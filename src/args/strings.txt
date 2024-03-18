@@ -1,0 +1,19 @@
+------------------------ tcobalt Command Line Utility ------------------------
+This utility downloads videos from the internet straight from your terminal.
+Usage: tc <method> <required args> [optional args]
+Methods:
+	get <url> [options]
+	list
+	help [method]
+	bulk <verb> <text>
+Type "help <method>" for more information about a method and its options
+This is free software; you should have received a copy of the GNU GPL v3.0 license with it.
+
+[get]
+guh
+
+[list]
+guh
+
+[bulk]
+guh
