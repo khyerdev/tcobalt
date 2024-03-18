@@ -6,6 +6,7 @@ Methods:
 	list
 	help [method]
 	bulk <verb> <text>
+You can also type the first letter for a method
 Type "help <method>" for more information about a method and its options
 This is free software; you should have received a copy of the GNU GPL v3.0 license with it.
 
