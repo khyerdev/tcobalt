@@ -8,13 +8,15 @@ Methods:
 	bulk <verb> <text>
 You can also type the first letter for a method
 Type "help <method>" for more information about a method and its options
-This is free software; you should have received a copy of the GNU GPL v3.0 license with it.
 
 [get]
-guh
+------------------------ tcobalt Command Line Utility ------------------------
+guh get
 
 [list]
-guh
+------------------------ tcobalt Command Line Utility ------------------------
+guh list
 
 [bulk]
-guh
+------------------------ tcobalt Command Line Utility ------------------------
+guh bulk

@@ -1,12 +1,14 @@
+#[derive(Debug, PartialEq, Eq)]
 pub enum VideoCodec {
-    h264, av1, vp9
+    H264, AV1, VP9
 }
 impl Default for VideoCodec {
     fn default() -> Self {
-        Self::h264
+        Self::H264
     }
 }
 
+#[derive(Debug, PartialEq, Eq)]
 pub struct VideoQuality {
     quality: u16
 }
@@ -16,6 +18,7 @@ impl Default for VideoQuality {
     }
 }
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum AudioFormat {
     BEST, MP3, OGG, WAV, OPUS
 }
@@ -25,6 +28,35 @@ impl Default for AudioFormat {
     }
 }
 
+#[derive(Debug, PartialEq, Eq)]
 pub enum Help {
-    Get, List, Bulk
+    Get, List, Bulk, Help
+}
+
+#[derive(Debug, PartialEq, Eq)]
+enum ParseErrType {
+    InvalidArg,
+    Incomplete
+}
+#[derive(Debug)]
+pub struct ParseError {
+    err_type: ParseErrType,
+    message: String
+}
+impl ParseError {
+    pub fn throw_incomplete(message: &str) -> Self {
+        Self {
+            err_type: ParseErrType::Incomplete,
+            message: message.to_string()
+        }
+    }
+    pub fn throw_invalid(message: &str) -> Self {
+        Self {
+            err_type: ParseErrType::InvalidArg,
+            message: message.to_string()
+        }
+    }
+    pub fn print(&self) -> String {
+        format!("{:?}: {}", self.err_type , &self.message)
+    }
 }
