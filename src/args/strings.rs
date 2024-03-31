@@ -10,14 +10,15 @@ pub fn get_help() -> String {
     remove_trailing_whitespace(string)
 }
 
-pub fn get_mod_help(help_mod: String) -> String {
+pub fn get_mod_help(help_mod: &str) -> String {
     let mut string = String::new();
     let mut select = false;
     let mut brackets = 0;
     for line in RAW.lines().into_iter() {
-        if !select && remove_trailing_whitespace(line) != format!("[{help_mod}]") { continue } else { select = true }
-        if line.chars().collect::<Vec<char>>().first() == Some(&'[') { brackets += 1 }
         if brackets == 2 { break }
+        if !select && remove_trailing_whitespace(line) != format!("[{help_mod}]") { continue }
+        select = true;
+        if line.chars().collect::<Vec<char>>().first() == Some(&'[') { brackets += 1; continue }
 
         string.push_str(line);
         string.push('\n');
@@ -27,6 +28,7 @@ pub fn get_mod_help(help_mod: String) -> String {
 
 fn remove_trailing_whitespace(string: impl ToString) -> String {
     let mut string = string.to_string();
+    if string.len() == 0 { return string }
     let chars = string.chars().collect::<Vec<char>>();
     let mut i = string.len()-1;
     while chars.get(i) == Some(&'\n') || chars.get(i) == Some(&' ') {

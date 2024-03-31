@@ -30,6 +30,31 @@ impl Args {
             help_flag: None
         }
     }
+    pub fn parse(mut self) -> Result<Self, types::ParseError> {
+        self.parsed = true;
+        self.raw = self.raw.iter().map(|str| str.to_lowercase()).collect::<Vec<String>>();
+        match self.raw.get(1) {
+            Some(method) => match method.as_str() {
+                "help" | "-h" | "--help" | "h" => match self.raw.get(2) {
+                    Some(help) => match help.as_str() {
+                        "get" | "g" => self.help_flag = Some(types::Help::Get),
+                        "list" | "l" => self.help_flag = Some(types::Help::List),
+                        "bulk" | "b" => self.help_flag = Some(types::Help::Bulk),
+                        "help" | "h" => self.help_flag = Some(types::Help::Help),
+                        _ => self.help_flag = Some(types::Help::Help)
+                    },
+                    None => self.help_flag = Some(types::Help::Help),
+                },
+                "get" | "g" => todo!(),
+                "list" | "l" => todo!(),
+                "bulk" | "b" => todo!(),
+
+                unknown => return Err(types::ParseError::throw_invalid(&format!("Unrecognized tcobalt method: {}", unknown)))
+            },
+            None => unreachable!() 
+        }
+        Ok(self)
+    }
     pub fn _override_args(args: &[&str]) -> Self {
         let mut args = args.to_vec().iter().map(|str| str.to_string()).collect::<Vec<String>>();
         args.insert(0, "tc".to_string());
@@ -46,31 +71,6 @@ impl Args {
             out_filename: None,
             help_flag: None
         }
-    }
-    pub fn parse(mut self) -> Result<Self, types::ParseError> {
-        self.parsed = true;
-        self.raw = self.raw.iter().map(|str| str.to_lowercase()).collect::<Vec<String>>();
-        match self.raw.get(1) {
-            Some(method) => match method.as_str() {
-                "get" => todo!(),
-                "list" => todo!(),
-                "help" => match self.raw.get(2) {
-                    Some(help) => match help.as_str() {
-                        "get" => self.help_flag = Some(types::Help::Get),
-                        "list" => self.help_flag = Some(types::Help::List),
-                        "bulk" => self.help_flag = Some(types::Help::Bulk),
-                        "help" => self.help_flag = Some(types::Help::Help),
-                        _ => self.help_flag = Some(types::Help::Help)
-                    },
-                    None => self.help_flag = Some(types::Help::Help),
-                },
-                "bulk" => todo!(),
-
-                unknown => return Err(types::ParseError::throw_invalid(&format!("Unrecognized tcobalt method: {}", unknown)))
-            },
-            None => return Err(types::ParseError::throw_incomplete("Missing tcobalt method"))
-        }
-        Ok(self)
     }
 }
 
