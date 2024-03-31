@@ -32,6 +32,10 @@ impl Default for AudioFormat {
 pub enum Help {
     Get, List, Bulk, Help
 }
+#[derive(Debug, PartialEq, Eq)]
+pub enum Method {
+    Get, List, Bulk, Help, Version, CobaltVersion
+}
 
 #[derive(Debug, PartialEq, Eq)]
 enum ParseErrType {

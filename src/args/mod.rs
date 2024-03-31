@@ -4,7 +4,9 @@ pub mod strings;
 pub struct Args {
     pub raw: Vec<String>,
     pub parsed: bool,
+    pub method: Option<types::Method>,
     pub c_url: Option<String>,
+    pub cb_url_list: Option<Vec<String>>,
     pub c_video_codec: Option<types::VideoCodec>,
     pub c_video_quality: Option<types::VideoQuality>,
     pub c_audio_format: Option<types::AudioFormat>,
@@ -27,9 +29,12 @@ impl Args {
             c_audio_muted: None,
             c_twitter_gif: None,
             out_filename: None,
-            help_flag: None
+            help_flag: None,
+            method: None,
+            cb_url_list: None,
         }
     }
+
     pub fn parse(mut self) -> Result<Self, types::ParseError> {
         self.parsed = true;
         self.raw = self.raw.iter().map(|str| str.to_lowercase()).collect::<Vec<String>>();
@@ -55,6 +60,7 @@ impl Args {
         }
         Ok(self)
     }
+
     pub fn _override_args(args: &[&str]) -> Self {
         let mut args = args.to_vec().iter().map(|str| str.to_string()).collect::<Vec<String>>();
         args.insert(0, "tc".to_string());
@@ -69,7 +75,9 @@ impl Args {
             c_audio_muted: None,
             c_twitter_gif: None,
             out_filename: None,
-            help_flag: None
+            help_flag: None,
+            method: None,
+            cb_url_list: None,
         }
     }
 }
