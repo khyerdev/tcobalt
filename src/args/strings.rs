@@ -10,7 +10,7 @@ pub fn get_help() -> String {
     remove_trailing_whitespace(string)
 }
 
-pub fn get_mod_help(help_mod: &str) -> String {
+pub fn get_mod(help_mod: &str) -> String {
     let mut string = String::new();
     let mut select = false;
     let mut brackets = 0;

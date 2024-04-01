@@ -40,19 +40,24 @@ impl Args {
         self.raw = self.raw.iter().map(|str| str.to_lowercase()).collect::<Vec<String>>();
         match self.raw.get(1) {
             Some(method) => match method.as_str() {
-                "help" | "-h" | "--help" | "h" => match self.raw.get(2) {
-                    Some(help) => match help.as_str() {
-                        "get" | "g" => self.help_flag = Some(types::Help::Get),
-                        "list" | "l" => self.help_flag = Some(types::Help::List),
-                        "bulk" | "b" => self.help_flag = Some(types::Help::Bulk),
-                        "help" | "h" => self.help_flag = Some(types::Help::Help),
-                        _ => self.help_flag = Some(types::Help::Help)
-                    },
-                    None => self.help_flag = Some(types::Help::Help),
+                "help" | "-h" | "--help" | "h" => {
+                    self.method = Some(types::Method::Version);
+                    match self.raw.get(2) {
+                        Some(help) => match help.as_str() {
+                            "get" | "g" => self.help_flag = Some(types::Help::Get),
+                            "list" | "l" => self.help_flag = Some(types::Help::List),
+                            "bulk" | "b" => self.help_flag = Some(types::Help::Bulk),
+                            "help" | "h" => self.help_flag = Some(types::Help::Help),
+                            _ => self.help_flag = Some(types::Help::Help)
+                        },
+                        None => self.help_flag = Some(types::Help::Help),
+                    }
                 },
                 "get" | "g" => todo!(),
-                "list" | "l" => todo!(),
+                "list" | "l" => self.method = Some(types::Method::List),
                 "bulk" | "b" => todo!(),
+                "version" | "v" => self.method = Some(types::Method::Version),
+                "cobalt-version" | "cv" => self.method = Some(types::Method::CobaltVersion),
 
                 unknown => return Err(types::ParseError::throw_invalid(&format!("Unrecognized tcobalt method: {}", unknown)))
             },
