@@ -2,7 +2,8 @@ mod args;
 use args as tcargs;
 use args::Args;
 
-fn main() -> std::process::ExitCode {
+#[tokio::main]
+async fn main() -> std::process::ExitCode {
     if std::env::args().len() == 1 {
         println!("tcobalt Command Line Utility; run `tc help` for help");
         return std::process::ExitCode::SUCCESS;
@@ -31,8 +32,11 @@ fn main() -> std::process::ExitCode {
         args::types::Method::List => println!("{}", tcargs::strings::get_mod("supported")),
         args::types::Method::Bulk => todo!(),
         args::types::Method::Help => unreachable!(),
-        args::types::Method::Version => todo!(),
-        args::types::Method::CobaltVersion => todo!(),
+        args::types::Method::Version => println!("{}", tcargs::strings::get_mod("version")),
+        args::types::Method::CobaltVersion => {
+            let ver = reqwest::get("https://co.wuk.sh/api/serverInfo").await.unwrap().text().await.unwrap();
+            
+        },
     }
     std::process::ExitCode::SUCCESS
 }

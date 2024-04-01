@@ -51,3 +51,6 @@ Verbs:
 		- Syntax is the same as command-line tcobalt, just without `tc get` each line
 
 Text piped in through `command | tc bulk` will be used as the space-separated url list
+
+[version]
+tcobalt command line utility v1.0.0
