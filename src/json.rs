@@ -9,17 +9,20 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
     let mut global_set = false;
     let mut set_level: u16 = 0;
     let mut list_level: u16 = 0;
-    let mut subset_history: Vec<bool> = Vec::new(); // set = true, list = false
+    let mut history: Vec<ReadHistory> = Vec::new();
     let mut key_level: u8 = 0;
 
     let mut key_buf: String = String::new();
     let mut key_list: Vec<String> = Vec::new();
     let mut str_buf = String::new();
     let mut num_buf = String::new();
+    let mut is_float = false;
     let mut bool_buf = String::new();
     let mut null_buf = String::new();
     let mut list_buf: Vec<Vec<JsonValue>> = Vec::new();
+    let mut current_list: Vec<JsonValue> = Vec::new();
     let mut subset_buf: Vec<HashMap<String, JsonValue>> = Vec::new();
+    let mut current_subset: HashMap<String, JsonValue> = HashMap::new();
 
     let mut parsed_map: HashMap<String, JsonValue> = HashMap::new();
     for c in json.chars() {
@@ -79,31 +82,28 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                         return Err(format!("Colon expected, got '{c}'"))
                     }
                 },
-                2 => match reading {
+                2 => match reading { // NOTE: add comma and closing bracket checking beforehand
                     Reader::None => match c { // TODO: i have alot of work to do about nested sets and lists.
                         '{' => {
                             set_level += 1;
-                            subset_history.push(true);
                         },
                         '}' => {
                             set_level -= 1;
-                            subset_history.pop();
                         },
                         '[' => {
                             list_level += 1;
-                            subset_history.push(false);
                         },
                         ']' => {
                             list_level -= 1;
-                            subset_history.pop();
                         },
                         '"' => {
                             reading = Reader::ValStr;
                             ignore_whitespace = false;
                         },
                         '0'..='9' => { reading = Reader::ValNum; num_buf.push(c) },
-                        't' | 'f' => { reading = Reader::ValBool; bool_buf.push(c) },
-                        'n' => { reading = Reader::ValNull; null_buf.push(c) },
+                        '.' => { reading = Reader::ValNum; num_buf.push('0'); num_buf.push(c) }
+                        't' | 'f' => { reading = Reader::ValBool; bool_buf.push(c); ignore_whitespace = false },
+                        'n' => { reading = Reader::ValNull; null_buf.push(c); ignore_whitespace = false },
                         e => return Err(format!("Invalid character: {e}"))
                     }
                     Reader::Key => unreachable!(),
@@ -111,20 +111,109 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                         '"' => {
                             reading = Reader::None;
                             ignore_whitespace = true;
-                            // TODO: insert into correct hashmap/list
+                            match set_level {
+                                1 => {
+                                    parsed_map.insert(key_buf.clone(), JsonValue::Str(str_buf.clone()));
+                                },
+                                _ => {
+                                    current_subset.insert(key_buf.clone(), JsonValue::Str(str_buf.clone()));
+                                }
+                            }
+                            key_buf.clear();
+                            str_buf.clear();
                             key_level = 3;
                         },
                         _ => str_buf.push(c)
                     },
                     Reader::ValNum => match c {
-                        '0'..='9' | '.' => num_buf.push(c),
+                        '0'..='9' => num_buf.push(c),
+                        '.' => {
+                            if !is_float {
+                                is_float = true;
+                                num_buf.push(c);
+                            } else {
+                                return Err("Floats can only have one decimal character".to_string())
+                            }
+                        },
                         ',' => {
-
+                            match set_level {
+                                1 => {
+                                    match is_float {
+                                        true => {
+                                            parsed_map.insert(key_buf.clone(), JsonValue::Float(num_buf.clone().parse().unwrap()));
+                                        },
+                                        false => {
+                                            parsed_map.insert(key_buf.clone(), JsonValue::Int(num_buf.clone().parse().unwrap()));
+                                        },
+                                    }
+                                },
+                                _ => {
+                                    match is_float {
+                                        true => {
+                                            current_subset.insert(key_buf.clone(), JsonValue::Float(num_buf.clone().parse().unwrap()));
+                                        },
+                                        false => {
+                                            current_subset.insert(key_buf.clone(), JsonValue::Int(num_buf.clone().parse().unwrap()));
+                                        },
+                                    }
+                                }
+                            }
+                            is_float = false;
+                            key_buf.clear();
+                            num_buf.clear();
+                            key_level = 0;
                         }
-                        // TODO: yapping
+                        // TODO: add closing bracket
+                        o => return Err(format!("Invalid character '{o}' found in number"))
                     },
-                    Reader::ValBool => todo!(),
-                    Reader::ValNull => todo!(),
+                    Reader::ValBool => match bool_buf.as_str() {
+                        "t" => if c == 'r' { bool_buf.push(c) } else { return Err(format!("Invalid character in bool: {c}")) }
+                        "tr" => if c == 'u' { bool_buf.push(c) } else { return Err(format!("Invalid character in bool: {c}")) }
+                        "tru" => if c == 'e' { ignore_whitespace = true; bool_buf.push(c) } else { return Err(format!("Invalid character in bool: {c}")) }
+                        "f" => if c == 'a' { bool_buf.push(c) } else { return Err(format!("Invalid character in bool: {c}")) }
+                        "fa" => if c == 'l' { bool_buf.push(c) } else { return Err(format!("Invalid character in bool: {c}")) }
+                        "fal" => if c == 's' { bool_buf.push(c) } else { return Err(format!("Invalid character in bool: {c}")) }
+                        "fals" => if c == 'e' { ignore_whitespace = true; bool_buf.push(c) } else { return Err(format!("Invalid character in bool: {c}")) }
+                        "true" | "false" => {
+                            if c == ',' {
+                                match set_level {
+                                    1 => {
+                                        parsed_map.insert(key_buf.clone(), JsonValue::Bool(bool_buf.clone().parse().unwrap()));
+                                    }
+                                    _ => {
+                                        current_subset.insert(key_buf.clone(), JsonValue::Bool(bool_buf.clone().parse().unwrap()));
+                                    }
+                                }
+                                ignore_whitespace = true;
+                                key_buf.clear();
+                                bool_buf.clear();
+                                key_level = 0;
+                            } // TODO: i also need to add else
+                        },
+                        _ => unreachable!()
+                    },
+                    Reader::ValNull => match null_buf.as_str() {
+                        "n" => if c == 'u' { bool_buf.push(c) } else { return Err(format!("Invalid character in nullval: {c}")) }
+                        "nu" => if c == 'l' { bool_buf.push(c) } else { return Err(format!("Invalid character in nullval: {c}")) }
+                        "nul" => if c == 'l' { bool_buf.push(c) } else { return Err(format!("Invalid character in nullval: {c}")) }
+                        "null" => {
+                            if c == ',' {
+                                match set_level {
+                                    1 => {
+                                        parsed_map.insert(key_buf.clone(), JsonValue::Null);
+                                    }
+                                    _ => {
+                                        current_subset.insert(key_buf.clone(), JsonValue::Null);
+                                    }
+                                }
+                                ignore_whitespace = true;
+                                key_buf.clear();
+                                null_buf.clear();
+                                key_level = 0;
+                            }
+                        },
+                        _ => unreachable!()
+                    }
                 },
                 3 => todo!(),
                 _ => unreachable!()
@@ -143,6 +232,9 @@ enum Reader {
     ValNum,
     ValBool,
     ValNull
+}
+enum ReadHistory {
+    Str, Num, Bool, Null, List, Set
 }
 
 pub enum JsonValue {

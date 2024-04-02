@@ -23,6 +23,7 @@ fn json_parse() {
             \"member2\"
         ],
         \"inline list\": [\"member1\", \"menber2\", 99, false, {\"member key\": \"val\"}]
+        \"float\": 6752.88
         \"subset\": {
             \"subkey\": \"val\",
             \"sublist\": [\"only member\"]
