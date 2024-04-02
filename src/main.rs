@@ -1,3 +1,4 @@
+mod json;
 mod args;
 use args as tcargs;
 use args::Args;
