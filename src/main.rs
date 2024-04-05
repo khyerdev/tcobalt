@@ -36,7 +36,10 @@ async fn main() -> std::process::ExitCode {
         args::types::Method::Version => println!("{}", tcargs::strings::get_mod("version")),
         args::types::Method::CobaltVersion => {
             let ver = reqwest::get("https://co.wuk.sh/api/serverInfo").await.unwrap().text().await.unwrap();
-            
+            let stats = json::parse(ver).expect("cobalt server returned invalid json");
+            let version = stats.get("version").unwrap().get_str().unwrap();
+            let commit = stats.get("commit").unwrap().get_str().unwrap();
+            println!("Cobalt (by wukko) version {version} on commit {commit}");
         },
     }
     std::process::ExitCode::SUCCESS

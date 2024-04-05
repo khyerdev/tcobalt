@@ -32,7 +32,6 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
     let mut parsed_map: HashMap<String, JsonValue> = HashMap::new();
     for (i, c) in json.chars().enumerate() {
         if !((c.is_control() || c == ' ') && ignore_whitespace) {
-            println!("{i}:{c}");
             if object_level == 0 {
                 if global_object == false {
                     if c == '{' {
