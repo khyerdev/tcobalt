@@ -85,7 +85,13 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                     }
                 },
                 2 => { 
-                    if (c == ',' || c == '}') && (reading != Reader::None || closing_expect || str_finish) && reading != Reader::ValStr {
+                    let mut is_array = false;
+                    if let Some(first_hist) = history.last() {
+                        if first_hist == &ReadHistory::Array {
+                            is_array = true;
+                        }
+                    }
+                    if (c == ',' || c == '}' || (c == ']' && is_array)) && (reading != Reader::None || closing_expect || str_finish) && reading != Reader::ValStr {
                         reading = Reader::None;
                         if !can_continue {
                             return Err(format!("Character {c} placed too early at char {i}"));
@@ -220,7 +226,7 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                         return Err(format!("Expected comma or closing bracket at char {i}"))
                     }
                     match reading {
-                        Reader::None => match c { // TODO: i have alot of work to do about nested objects and arrays.
+                        Reader::None => match c {
                             '{' => {
                                 match object_level {
                                     0 => unreachable!(),
