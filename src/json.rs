@@ -35,7 +35,7 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
     let mut parsed_map: HashMap<String, JsonValue> = HashMap::new();
     for (i, c) in json.chars().enumerate() {
         if !((c.is_control() || c == ' ') && ignore_whitespace) {
-            println!("{:?} : {c} - {key_level} ; a{array_level} o{object_level}", history);
+            // println!("{:?} : {c} - {key_level} ; a{array_level} o{object_level}", history);
 
             // NOTE: will return an error if an array or object is empty
 
@@ -111,7 +111,7 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                         let mut already_checked_ab = false;
 
                         let next_array = history.get(sub_without_overflow(history.len(), 2)) == Some(&ReadHistory::Array);
-                        let nextnext_array = history.get(sub_without_overflow(history.len(), 3)) == Some(&ReadHistory::Array) && history.get(sub_without_overflow(history.len(), 2)) == Some(&ReadHistory::Object);
+                        let nextnext_array = history.get(sub_without_overflow(history.len(), 3)) == Some(&ReadHistory::Array);
 
                         let mut get = history.pop();
                         if c == ',' && (get == Some(ReadHistory::Object) || get == Some(ReadHistory::Array)) {
@@ -310,7 +310,7 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                                     key_buf.clear();
                                 },
                                 _ => {
-                                    if next_array {
+                                    if nextnext_array {
                                         temp_array = current_array.clone();
                                         current_array = array_storage.pop().unwrap();
                                         current_array.push(JsonValue::Array(temp_array.clone()));
@@ -373,7 +373,6 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                         continue;
                     }
                     if c == ',' && last_push_object {
-                        println!("quar?");
                         closing_expect = false;
                         last_push_object = false;
                         continue;
