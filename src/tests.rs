@@ -103,6 +103,52 @@ fn json_parse() {
 }
 
 #[test]
+#[ignore]
+fn empty_json() {
+    use std::collections::HashMap;
+    use crate::json::{self, JsonValue as Val};
+
+    let empty_json = "{}";
+    let empty_object = "{\"key\":{}}";
+    let empty_array = "{\"key\":[]}";
+    let obj_empty_array = "{\"key\":{\"arr1\":[],\"arr2\":[]}}";
+    let arr_empty_object = "{\"key\":[{},{},{}]}";
+
+    let parsed_ej = json::parse(empty_json).unwrap();
+    let parsed_eo = json::parse(empty_object).unwrap();
+    let parsed_ea = json::parse(empty_array).unwrap();
+    let parsed_oea = json::parse(obj_empty_array).unwrap();
+    let parsed_aeo = json::parse(arr_empty_object).unwrap();
+
+    let proper_ej: HashMap<String, Val> = HashMap::new();
+    let proper_eo: HashMap<String, Val> = HashMap::from([
+        ("key".into(), Val::Object(HashMap::new()))
+    ]);
+    let proper_ea: HashMap<String, Val> = HashMap::from([
+        ("key".into(), Val::Array(Vec::new()))
+    ]);
+    let proper_oea: HashMap<String, Val> = HashMap::from([
+        ("key".into(), Val::Object(HashMap::from([
+            ("arr1".into(), Val::Array(Vec::new())),
+            ("arr2".into(), Val::Array(Vec::new()))
+        ])))
+    ]);
+    let proper_aeo: HashMap<String, Val> = HashMap::from([
+        ("key".into(), Val::Array(vec![
+            Val::Object(HashMap::new()),
+            Val::Object(HashMap::new()),
+            Val::Object(HashMap::new())
+        ]))
+    ]);
+
+    assert_eq!(proper_ej, parsed_ej);
+    assert_eq!(proper_eo, parsed_eo);
+    assert_eq!(proper_ea, parsed_ea);
+    assert_eq!(proper_oea, parsed_oea);
+    assert_eq!(proper_aeo, parsed_aeo);
+}
+
+#[test]
 #[should_panic]
 fn space_is_control() {
     assert!(' '.is_control());
