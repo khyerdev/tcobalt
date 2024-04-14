@@ -66,14 +66,14 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
             match key_level {
                 0 => match reading { // TODO: support empty objects and empty arrays
                     Reader::None => match c {
-                        '"' => {
+                        '"' | '\'' => {
                             reading = Reader::Key;
                             ignore_whitespace = false;
                         },
                         _ => return Err(format!("Double quote expected, got '{c}' at char {i}"))
                     },
                     Reader::Key => match c {
-                        '"' => {
+                        '"' | '\'' => {
                             reading = Reader::None;
                             key_level = 1;
                             ignore_whitespace = true;
@@ -414,7 +414,7 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                                 array_level += 1;
                                 history.push(ReadHistory::Array);
                             },
-                            '\"' => {
+                            '\"' | '\'' => {
                                 reading = Reader::ValStr;
                                 ignore_whitespace = false;
                                 history.push(ReadHistory::Str);
@@ -453,7 +453,7 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                         }
                         Reader::Key => unreachable!(),
                         Reader::ValStr => match c {
-                            '"' => {
+                            '"' | '\'' => {
                                 reading = Reader::None;
                                 ignore_whitespace = true;
                                 if is_array {

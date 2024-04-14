@@ -15,7 +15,7 @@ fn json_parse() {
     use std::collections::HashMap;
     use crate::json::{self, JsonValue as Val};
 
-    let inline_str = "{\"key\":\"val\",\"num\":42,\"bool\":true,\"none\":null,\"list\":[\"member1\",\"member2\"],\"subobj\":{\"subkey\":\"val\"}}";
+    let inline_str = "{'key':\"val\",\"num\":42,\"bool\":true,'none':null,\"list\":[\"member1\",\"member2\"],\"subobj\":{\"subkey\":\"val\"}}";
     let block_str = "{
         \"key\": \"val\",
         \"num\": 42,
@@ -25,7 +25,7 @@ fn json_parse() {
             \"member1\",
             \"member2\"
         ],
-        \"inline list\": [\"member1\", \"member2\", 99, false, {\"member key\": \"val\", \"ruhhhh\": [\"nuh uh\"]}, null],
+        \"inline list\": [\"member1\", 'member2', 99, false, {\"member key\": \"val\", \"ruhhhh\": [\"nuh uh\"]}, null],
         \"float\": 6752.88,
         \"subobj\": {
             \"subkey\": \"val\",
