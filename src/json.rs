@@ -8,30 +8,37 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
     let mut can_continue = false;
     let mut closing_expect = false;
     let mut str_finish = false;
+    let mut is_float = false;
     let mut reading = Reader::None;
     let mut global_object = false;
     let mut object_level: u16 = 0;
     let mut array_level: u16 = 0;
     let mut history: Vec<ReadHistory> = Vec::new();
     let mut key_level: u8 = 0;
+    let mut last_push_object = false;
 
     let mut key_buf: String = String::new();
     let mut key_array: Vec<String> = Vec::new();
     let mut str_buf = String::new();
     let mut num_buf = String::new();
-    let mut is_float = false;
     let mut bool_buf = String::new();
     let mut null_buf = String::new();
     let mut array_storage: Vec<Vec<JsonValue>> = Vec::new();
+    #[allow(unused_assignments)]
     let mut temp_array: Vec<JsonValue> = Vec::new();
     let mut current_array: Vec<JsonValue> = Vec::new();
     let mut subobject_storage: Vec<HashMap<String, JsonValue>> = Vec::new();
+    #[allow(unused_assignments)]
     let mut temp_object: HashMap<String, JsonValue> = HashMap::new();
     let mut current_subobject: HashMap<String, JsonValue> = HashMap::new();
 
     let mut parsed_map: HashMap<String, JsonValue> = HashMap::new();
     for (i, c) in json.chars().enumerate() {
         if !((c.is_control() || c == ' ') && ignore_whitespace) {
+            println!("{:?} : {c} - {key_level} ; a{array_level} o{object_level}", history);
+
+            // NOTE: will return an error if an array or object is empty
+
             if object_level == 0 {
                 if global_object == false {
                     if c == '{' {
@@ -89,15 +96,28 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                     if let Some(first_hist) = history.last() {
                         if first_hist == &ReadHistory::Array {
                             is_array = true;
+                        } else if let Some(second_hist) = history.get(sub_without_overflow(history.len(), 2)) {
+                            if second_hist == &ReadHistory::Array && (reading != Reader::None || str_finish) {
+                                is_array = true;
+                            }
                         }
                     }
-                    if (c == ',' || c == '}' || (c == ']' && is_array)) && (reading != Reader::None || closing_expect || str_finish) && reading != Reader::ValStr {
+                    if ((c == ',' && !last_push_object) || (c == '}' && !is_array) || (c == ']' && is_array)) && (reading != Reader::None || closing_expect || str_finish) && reading != Reader::ValStr {
                         reading = Reader::None;
                         if !can_continue {
                             return Err(format!("Character {c} placed too early at char {i}"));
                         }
                         let mut already_checked_cb = false;
-                        if let Some(hist) = history.pop() {
+                        let mut already_checked_ab = false;
+
+                        let next_array = history.get(sub_without_overflow(history.len(), 2)) == Some(&ReadHistory::Array);
+                        let nextnext_array = history.get(sub_without_overflow(history.len(), 3)) == Some(&ReadHistory::Array) && history.get(sub_without_overflow(history.len(), 2)) == Some(&ReadHistory::Object);
+
+                        let mut get = history.pop();
+                        if c == ',' && (get == Some(ReadHistory::Object) || get == Some(ReadHistory::Array)) {
+                            history.push(get.take().unwrap());
+                        }
+                        if let Some(hist) = get.take() {
                             match hist {
                                 ReadHistory::Str => {
                                     str_finish = false;
@@ -106,71 +126,182 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                                     if num_buf.chars().last() == Some('.') {
                                         return Err(format!("Expected digits after decimal, got: {c} at char {i}"));
                                     }
-                                    match object_level {
-                                        1 => {
-                                            match is_float {
-                                                true => {
-                                                    parsed_map.insert(key_buf.clone(), JsonValue::Float(num_buf.clone().parse().unwrap()));
-                                                },
-                                                false => {
-                                                    parsed_map.insert(key_buf.clone(), JsonValue::Int(num_buf.clone().parse().unwrap()));
-                                                },
+                                    match is_float {
+                                        true => {
+                                            if is_array {
+                                                current_array.push(JsonValue::Float(num_buf.clone().parse().unwrap()));
+                                            } else {
+                                                match object_level {
+                                                    1 => {
+                                                        parsed_map.insert(key_buf.clone(), JsonValue::Float(num_buf.clone().parse().unwrap()));
+                                                    },
+                                                    _ => {
+                                                        current_subobject.insert(key_buf.clone(), JsonValue::Float(num_buf.clone().parse().unwrap()));
+                                                    }
+                                                }
                                             }
                                         },
-                                        _ => {
-                                            match is_float {
-                                                true => {
-                                                    current_subobject.insert(key_buf.clone(), JsonValue::Float(num_buf.clone().parse().unwrap()));
-                                                },
-                                                false => {
-                                                    current_subobject.insert(key_buf.clone(), JsonValue::Int(num_buf.clone().parse().unwrap()));
-                                                },
+                                        false => {
+                                            if is_array {
+                                                current_array.push(JsonValue::Int(num_buf.clone().parse().unwrap()));
+                                            } else {
+                                                match object_level {
+                                                    1 => {
+                                                        parsed_map.insert(key_buf.clone(), JsonValue::Int(num_buf.clone().parse().unwrap()));
+                                                    },
+                                                    _ => {
+                                                        current_subobject.insert(key_buf.clone(), JsonValue::Int(num_buf.clone().parse().unwrap()));
+                                                    }
+                                                }
                                             }
                                         }
                                     }
                                     is_float = false;
                                     ignore_whitespace = true;
-                                    key_buf.clear();
+                                    if !is_array {
+                                        key_buf.clear();
+                                    }
                                     num_buf.clear();
-                                }
+                                },
                                 ReadHistory::Bool => {
                                     if !(bool_buf == "true" || bool_buf == "false") {
                                         return Err(format!("Incomplete bool value with char {c} at char {i}"));
                                     }
-                                    match object_level {
-                                        1 => {
-                                            parsed_map.insert(key_buf.clone(), JsonValue::Bool(bool_buf.clone().parse().unwrap()));
-                                        }
-                                        _ => {
-                                            current_subobject.insert(key_buf.clone(), JsonValue::Bool(bool_buf.clone().parse().unwrap()));
+                                    if is_array {
+                                        current_array.push(JsonValue::Bool(bool_buf.clone().parse().unwrap()));
+                                    } else {
+                                        match object_level {
+                                            1 => {
+                                                parsed_map.insert(key_buf.clone(), JsonValue::Bool(bool_buf.clone().parse().unwrap()));
+                                            }
+                                            _ => {
+                                                current_subobject.insert(key_buf.clone(), JsonValue::Bool(bool_buf.clone().parse().unwrap()));
+                                            }
                                         }
                                     }
                                     ignore_whitespace = true;
-                                    key_buf.clear();
+                                    if !is_array {
+                                        key_buf.clear();
+                                    }
                                     bool_buf.clear();
                                 },
                                 ReadHistory::Null => {
                                     if null_buf != "null" {
                                         return Err(format!("Incomplete null value with char {c} at char {i}"));
                                     }
-                                    match object_level {
-                                        1 => {
-                                            parsed_map.insert(key_buf.clone(), JsonValue::Null);
-                                        }
-                                        _ => {
-                                            current_subobject.insert(key_buf.clone(), JsonValue::Null);
+                                    if is_array {
+                                        current_array.push(JsonValue::Null);
+                                    } else {
+                                        match object_level {
+                                            1 => {
+                                                parsed_map.insert(key_buf.clone(), JsonValue::Null);
+                                            }
+                                            _ => {
+                                                current_subobject.insert(key_buf.clone(), JsonValue::Null);
+                                            }
                                         }
                                     }
                                     ignore_whitespace = true;
-                                    key_buf.clear();
+                                    if !is_array {
+                                        key_buf.clear();
+                                    }
                                     null_buf.clear();
                                 },
-                                ReadHistory::Array => { // NOTE: incomplete
+                                ReadHistory::Array => {
+                                    already_checked_ab = true;
+                                    last_push_object = false;
                                     array_level -= 1;
+                                    match array_level {
+                                        0 => {
+                                            match object_level {
+                                                1 => {
+                                                    parsed_map.insert(key_buf.clone(), JsonValue::Array(current_array.clone()));
+                                                },
+                                                _ => {
+                                                    current_subobject.insert(key_buf.clone(), JsonValue::Array(current_array.clone()));
+                                                }
+                                            }
+                                            current_array.clear();
+                                            key_buf.clear();
+                                        },
+                                        _ => {
+                                            if next_array {
+                                                temp_array = current_array.clone();
+                                                current_array = array_storage.pop().unwrap();
+                                                current_array.push(JsonValue::Array(temp_array.clone()));
+                                                temp_array.clear();
+                                            } else {
+                                                match object_level {
+                                                    1 => {
+                                                        parsed_map.insert(key_buf.clone(), JsonValue::Array(current_array.clone()));
+                                                        current_array = array_storage.pop().unwrap();
+                                                    }
+                                                    _ => {
+                                                        current_subobject.insert(key_buf.clone(), JsonValue::Array(current_array.clone()));
+                                                        current_array = array_storage.pop().unwrap();
+                                                    }
+                                                }
+                                                key_buf.clear();
+                                            }
+                                        }
+                                    }
+                                    closing_expect = true;
+                                },
+                                ReadHistory::Object => {
+                                    already_checked_cb = true;
+                                    last_push_object = true;
+                                    object_level -= 1;
+                                    if next_array {
+                                        key_buf = key_array.pop().unwrap();
+                                        match object_level {
+                                            1 => {
+                                                current_array.push(JsonValue::Object(current_subobject.clone()));
+                                                current_subobject.clear();
+                                            },
+                                            0 => break,
+                                            _ => {
+                                                temp_object = current_subobject.clone();
+                                                current_subobject = subobject_storage.pop().unwrap();
+                                                current_array.push(JsonValue::Object(temp_object.clone()));
+                                                temp_object.clear();
+                                            }
+                                        }
+                                    } else {
+                                        match object_level {
+                                            1 => {
+                                                parsed_map.insert(key_array.pop().unwrap(), JsonValue::Object(current_subobject.clone()));
+                                                current_subobject.clear();
+
+                                            },
+                                            0 => break,
+                                            _ => {
+                                                temp_object = current_subobject.clone();
+                                                current_subobject = subobject_storage.pop().unwrap();
+                                                current_subobject.insert(key_array.pop().unwrap(), JsonValue::Object(temp_object.clone()));
+                                                temp_object.clear();
+                                            }
+                                        }
+                                    }
+                                    closing_expect = true;
+                                }
+                            }
+                        }
+                        if c == ',' {
+                            if !is_array {
+                                key_level = 0;
+                            }
+                            closing_expect = false;
+                            can_continue = false;
+                        } else if c == ']' && !already_checked_ab {
+                            assert_eq!(history.pop().unwrap(), ReadHistory::Array);
+                            last_push_object = false;
+                            array_level -= 1;
+                            match array_level {
+                                0 => {
                                     match object_level {
                                         1 => {
                                             parsed_map.insert(key_buf.clone(), JsonValue::Array(current_array.clone()));
-                                        }
+                                        },
                                         _ => {
                                             current_subobject.insert(key_buf.clone(), JsonValue::Array(current_array.clone()));
                                         }
@@ -178,53 +309,79 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                                     current_array.clear();
                                     key_buf.clear();
                                 },
-                                ReadHistory::Object => {
-                                    already_checked_cb = true;
-                                    object_level -= 1;
-                                    match object_level {
-                                        1 => {
-                                            parsed_map.insert(key_array.pop().unwrap(), JsonValue::Object(current_subobject.clone()));
-                                            current_subobject.clear();
+                                _ => {
+                                    if next_array {
+                                        temp_array = current_array.clone();
+                                        current_array = array_storage.pop().unwrap();
+                                        current_array.push(JsonValue::Array(temp_array.clone()));
+                                        temp_array.clear();
+                                    } else {
+                                        match object_level {
+                                            1 => {
+                                                parsed_map.insert(key_buf.clone(), JsonValue::Array(current_array.clone()));
+                                                current_array = array_storage.pop().unwrap();
+                                            }
+                                            _ => {
+                                                current_subobject.insert(key_buf.clone(), JsonValue::Array(current_array.clone()));
+                                                current_array = array_storage.pop().unwrap();
+                                            }
                                         }
-                                        0 => break,
-                                        _ => {
-                                            temp_object = current_subobject.clone();
-                                            current_subobject = subobject_storage.pop().unwrap();
-                                            current_subobject.insert(key_array.pop().unwrap(), JsonValue::Object(temp_object.clone()));
-                                            temp_object.clear();
-                                        }
+                                        key_buf.clear();
                                     }
                                 }
                             }
-                        }
-                        if c == ',' {
-                            key_level = 0;
-                            closing_expect = false;
-                            can_continue = false;
+                            closing_expect = true;
                         } else if c == '}' && !already_checked_cb {
+                            last_push_object = true;
                             object_level -= 1;
-                            match object_level { // i love boilerplate code (using a closure will use a mutable reference for pretty much every value mentioned here)
-                                1 => {
-                                    assert_eq!(history.pop().unwrap(), ReadHistory::Object);
-                                    parsed_map.insert(key_array.pop().unwrap(), JsonValue::Object(current_subobject.clone()));
-                                    current_subobject.clear();
+                            if nextnext_array {
+                                key_buf = key_array.pop().unwrap();
+                                match object_level {
+                                    1 => {
+                                        assert_eq!(history.pop().unwrap(), ReadHistory::Object);
+                                        current_array.push(JsonValue::Object(current_subobject.clone()));
+                                        current_subobject.clear();
+                                    },
+                                    0 => break,
+                                    _ => {
+                                        assert_eq!(history.pop().unwrap(), ReadHistory::Object);
+                                        temp_object = current_subobject.clone();
+                                        current_subobject = subobject_storage.pop().unwrap();
+                                        current_array.push(JsonValue::Object(temp_object.clone()));
+                                        temp_object.clear();
+                                    }
                                 }
-                                0 => break,
-                                _ => {
-                                    assert_eq!(history.pop().unwrap(), ReadHistory::Object);
-                                    temp_object = current_subobject.clone();
-                                    current_subobject = subobject_storage.pop().unwrap();
-                                    current_subobject.insert(key_array.pop().unwrap(), JsonValue::Object(temp_object.clone()));
-                                    temp_object.clear();
+                            } else {
+                                match object_level {
+                                    1 => {
+                                        assert_eq!(history.pop().unwrap(), ReadHistory::Object);
+                                        parsed_map.insert(key_array.pop().unwrap(), JsonValue::Object(current_subobject.clone()));
+                                        current_subobject.clear();
+                                    },
+                                    0 => break,
+                                    _ => {
+                                        assert_eq!(history.pop().unwrap(), ReadHistory::Object);
+                                        temp_object = current_subobject.clone();
+                                        current_subobject = subobject_storage.pop().unwrap();
+                                        current_subobject.insert(key_array.pop().unwrap(), JsonValue::Object(temp_object.clone()));
+                                        temp_object.clear();
+                                    }
                                 }
                             }
                             closing_expect = true;
                         }
                         continue;
                     }
+                    if c == ',' && last_push_object {
+                        println!("quar?");
+                        closing_expect = false;
+                        last_push_object = false;
+                        continue;
+                    }
                     if closing_expect {
                         return Err(format!("Expected comma or closing bracket at char {i}"))
                     }
+                    last_push_object = false;
                     match reading {
                         Reader::None => match c {
                             '{' => {
@@ -247,6 +404,14 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                                 key_level = 0;
                             },
                             '[' => {
+                                match array_level {
+                                    0 => (),
+                                    u16::MAX => return Err(format!("Maximum array nesting reached at char {i}")),
+                                    _ => {
+                                        array_storage.push(current_array.clone());
+                                        current_array.clear();
+                                    }
+                                }
                                 array_level += 1;
                                 history.push(ReadHistory::Array);
                             },
@@ -292,15 +457,21 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                             '"' => {
                                 reading = Reader::None;
                                 ignore_whitespace = true;
-                                match object_level {
-                                    1 => {
-                                        parsed_map.insert(key_buf.clone(), JsonValue::Str(str_buf.clone()));
-                                    },
-                                    _ => {
-                                        current_subobject.insert(key_buf.clone(), JsonValue::Str(str_buf.clone()));
+                                if is_array {
+                                    current_array.push(JsonValue::Str(str_buf.clone()));
+                                } else {
+                                    match object_level {
+                                        1 => {
+                                            parsed_map.insert(key_buf.clone(), JsonValue::Str(str_buf.clone()));
+                                        },
+                                        _ => {
+                                            current_subobject.insert(key_buf.clone(), JsonValue::Str(str_buf.clone()));
+                                        }
                                     }
                                 }
-                                key_buf.clear();
+                                if !is_array {
+                                    key_buf.clear();
+                                }
                                 str_buf.clear();
                                 str_finish = true;
                             },
@@ -316,7 +487,6 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                                     return Err("Floats can only have one decimal character".to_string())
                                 }
                             },
-                            // TODO: add closing bracket
                             o => return Err(format!("Invalid character '{o}' found in number at char {i}"))
                         },
                         Reader::ValBool => match bool_buf.as_str() {
@@ -426,5 +596,13 @@ impl JsonValue {
             return Ok(val.clone())
         }
         Err(false)
+    }
+}
+
+fn sub_without_overflow(num: usize, subtractor: usize) -> usize {
+    if num < subtractor {
+        0
+    } else {
+        num - subtractor
     }
 }
