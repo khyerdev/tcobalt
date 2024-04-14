@@ -5,10 +5,6 @@ use args::Args;
 
 #[tokio::main]
 async fn main() -> std::process::ExitCode {
-
-
-    return std::process::ExitCode::SUCCESS;
-
     if std::env::args().len() == 1 {
         println!("tcobalt Command Line Utility; run `tc help` for help");
         return std::process::ExitCode::SUCCESS;
