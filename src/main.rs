@@ -39,7 +39,9 @@ async fn main() -> std::process::ExitCode {
             let stats = json::parse(ver).expect("cobalt server returned invalid json");
             let version = stats.get("version").unwrap().get_str().unwrap();
             let commit = stats.get("commit").unwrap().get_str().unwrap();
-            println!("Cobalt (by wukko) version {version} on commit {commit}");
+            let branch = stats.get("branch").unwrap().get_str().unwrap();
+            println!("Cobalt (by wukko) version {version}");
+            println!("Latest commit on branch \"{branch}\": {commit}");
         },
     }
     std::process::ExitCode::SUCCESS
