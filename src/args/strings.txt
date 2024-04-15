@@ -54,3 +54,22 @@ Text piped in through `command | tc bulk` will be used as the space-separated ur
 
 [version]
 tcobalt command line utility v1.0.0
+
+[supported]
+bilibili.com & bilibili.tv
+dailymotion videos
+instagram reels, posts & stories
+ok video (full video+audio only)
+pinterest videos & stories
+reddit videos & gifs
+rutube videos
+soundcloud (audio only)
+streamable.com
+tiktok videos, photos & audio
+tumblr video & audio
+twitch clips
+twitter videos & voice
+vimeo
+vine archive
+vk video & clips (full video+audio only)
+youtube videos, shorts & music
