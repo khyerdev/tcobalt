@@ -16,6 +16,8 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
     let mut history: Vec<ReadHistory> = Vec::new();
     let mut key_level: u8 = 0;
     let mut last_push_object = false;
+    let mut new_object = false;
+    let mut new_array = false;
 
     let mut key_buf: String = String::new();
     let mut key_array: Vec<String> = Vec::new();
@@ -37,13 +39,12 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
         if !((c.is_control() || c == ' ') && ignore_whitespace) {
             // println!("{:?} : {c} - {key_level} ; a{array_level} o{object_level}", history);
 
-            // NOTE: will return an error if an array or object is empty
-
             if object_level == 0 {
                 if global_object == false {
                     if c == '{' {
                         object_level = 1;
                         global_object = true;
+                        new_object = true;
                         continue
                     }
                     return Err("First non-whitespace character has to be '{'".to_string())
@@ -63,8 +64,100 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                 escape = true;
                 continue;
             }
+
+            if c == ']' && new_array {
+                let next_array = history.get(sub_without_overflow(history.len(), 2)) == Some(&ReadHistory::Array);
+
+                assert_eq!(history.pop().unwrap(), ReadHistory::Array);
+                last_push_object = false;
+                array_level -= 1;
+                match array_level {
+                    0 => {
+                        match object_level {
+                            1 => {
+                                parsed_map.insert(key_buf.clone(), JsonValue::Array(current_array.clone()));
+                            },
+                            _ => {
+                                current_subobject.insert(key_buf.clone(), JsonValue::Array(current_array.clone()));
+                            }
+                        }
+                        current_array.clear();
+                        key_buf.clear();
+                    },
+                    _ => {
+                        if next_array {
+                            temp_array = current_array.clone();
+                            current_array = array_storage.pop().unwrap();
+                            current_array.push(JsonValue::Array(temp_array.clone()));
+                            temp_array.clear();
+                        } else {
+                            match object_level {
+                                1 => {
+                                    parsed_map.insert(key_buf.clone(), JsonValue::Array(current_array.clone()));
+                                    current_array = array_storage.pop().unwrap();
+                                }
+                                _ => {
+                                    current_subobject.insert(key_buf.clone(), JsonValue::Array(current_array.clone()));
+                                    current_array = array_storage.pop().unwrap();
+                                }
+                            }
+                            key_buf.clear();
+                        }
+                    }
+                }
+                closing_expect = true;
+                can_continue = true;
+                key_level = 2;
+                continue;
+            } else if c == '}' && new_object {
+                let next_array = history.get(sub_without_overflow(history.len(), 2)) == Some(&ReadHistory::Array);
+
+                last_push_object = true;
+                object_level -= 1;
+                if next_array {
+                    key_buf = key_array.pop().unwrap();
+                    match object_level {
+                        1 => {
+                            assert_eq!(history.pop().unwrap(), ReadHistory::Object);
+                            current_array.push(JsonValue::Object(current_subobject.clone()));
+                            current_subobject.clear();
+                        },
+                        0 => break,
+                        _ => {
+                            assert_eq!(history.pop().unwrap(), ReadHistory::Object);
+                            temp_object = current_subobject.clone();
+                            current_subobject = subobject_storage.pop().unwrap();
+                            current_array.push(JsonValue::Object(temp_object.clone()));
+                            temp_object.clear();
+                        }
+                    }
+                } else {
+                    match object_level {
+                        1 => {
+                            assert_eq!(history.pop().unwrap(), ReadHistory::Object);
+                            parsed_map.insert(key_array.pop().unwrap(), JsonValue::Object(current_subobject.clone()));
+                            current_subobject.clear();
+                        },
+                        0 => break,
+                        _ => {
+                            assert_eq!(history.pop().unwrap(), ReadHistory::Object);
+                            temp_object = current_subobject.clone();
+                            current_subobject = subobject_storage.pop().unwrap();
+                            current_subobject.insert(key_array.pop().unwrap(), JsonValue::Object(temp_object.clone()));
+                            temp_object.clear();
+                        }
+                    }
+                }
+                closing_expect = true;
+                can_continue = true;
+                key_level = 2;
+                continue;
+            }
+            new_object = false;
+            new_array = false;
+
             match key_level {
-                0 => match reading { // TODO: support empty objects and empty arrays
+                0 => match reading {
                     Reader::None => match c {
                         '"' | '\'' => {
                             reading = Reader::Key;
@@ -399,6 +492,7 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                                     }
                                 }
                                 object_level += 1;
+                                new_object = true;
                                 history.push(ReadHistory::Object);
                                 key_level = 0;
                             },
@@ -412,6 +506,7 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                                     }
                                 }
                                 array_level += 1;
+                                new_array = true;
                                 history.push(ReadHistory::Array);
                             },
                             '\"' | '\'' => {
