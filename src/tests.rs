@@ -23,7 +23,7 @@ fn json_parse() {
         \"none\": null,
         \"list\": [
             \"member1\",
-            \"member2\"
+            \"member \\\"two\\\"\"
         ],
         \"inline list\": [\"member1\", 'member2', 99, false, {\"member key\": \"val\", \"ruhhhh\": [\"nuh uh\"]}, null],
         \"float\": 6752.88,
@@ -56,7 +56,7 @@ fn json_parse() {
         ("none".into(), Val::Null),
         ("list".into(), Val::Array(vec![
             Val::Str("member1".into()), 
-            Val::Str("member2".into())
+            Val::Str("member \"two\"".into())
         ])),
         ("inline list".into(), Val::Array(vec![
             Val::Str("member1".into()),
@@ -103,7 +103,7 @@ fn json_parse() {
 }
 
 #[test]
-#[ignore]
+// #[ignore]
 fn empty_json() {
     use std::collections::HashMap;
     use crate::json::{self, JsonValue as Val};
@@ -112,7 +112,7 @@ fn empty_json() {
     let empty_object = "{\"key\":{}}";
     let empty_array = "{\"key\":[]}";
     let obj_empty_array = "{\"key\":{\"arr1\":[],\"arr2\":[]}}";
-    let arr_empty_object = "{\"key\":[{},{},{}]}";
+    let arr_empty_object = "{\"key\":[{},2,{}]}";
 
     let parsed_ej = json::parse(empty_json).unwrap();
     let parsed_eo = json::parse(empty_object).unwrap();
@@ -136,10 +136,16 @@ fn empty_json() {
     let proper_aeo: HashMap<String, Val> = HashMap::from([
         ("key".into(), Val::Array(vec![
             Val::Object(HashMap::new()),
-            Val::Object(HashMap::new()),
+            Val::Int(2),
             Val::Object(HashMap::new())
         ]))
     ]);
+
+    eprintln!("proper ej: {proper_ej:?}");
+    eprintln!("proper eo: {proper_eo:?}");
+    eprintln!("proper ea: {proper_ea:?}");
+    eprintln!("proper oea: {proper_oea:?}");
+    eprintln!("proper aeo: {proper_aeo:?}");
 
     assert_eq!(proper_ej, parsed_ej);
     assert_eq!(proper_eo, parsed_eo);
