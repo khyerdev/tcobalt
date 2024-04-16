@@ -20,7 +20,7 @@ Easy downloading for videos/songs with simple syntax
 Usage: tc get <url> [options]
 
 Options:
-	-r --vcodec <codec>        The codec of the output video. Codecs: h264, aV1, vp9
+	-c --vcodec <codec>        The codec of the output video. Codecs: h264, aV1, vp9
 	-q --vquality <quality>    The quality of the output video. Options: 144, 480, 720, 1080, 1440, 2160
 	-f --aformat <format>      The format of the audio. Formats: best, mp3, ogg, wav, opus
 	-a --audio-only            Tells cobalt to only download and output the audio of the link
