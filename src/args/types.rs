@@ -10,7 +10,7 @@ impl Default for VideoCodec {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct VideoQuality {
-    quality: u16
+    pub quality: u16
 }
 impl Default for VideoQuality {
     fn default() -> Self {
