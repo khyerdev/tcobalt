@@ -1,6 +1,6 @@
 The tcobalt cli utility downloads videos from the internet straight from your terminal.
 This is just a wrapper around "cobalt.tools" made by wukko. I am not affiliated with wukko in any way.
-Usage: tc <method> <required args> [optional args]
+Usage: tcb <method> <required args> [optional args]
 
 Methods:
 	get <url> [options]
@@ -17,40 +17,42 @@ Type "help <method>" for more information about a method and its options
 [get]
 tcobalt "get" method syntax
 Easy downloading for videos/songs with simple syntax
-Usage: tc get <url> [options]
+Usage: tcb get <url> [options]
 
 Options:
 	-c --vcodec <codec>        The codec of the output video. Codecs: h264, av1, vp9, Default: h264
+                                   h264 and av1 are for .mp4 files, vp9 is for .webm files.
 	-q --vquality <quality>    The quality of the output video. Options: 144, 480, 720, 1080, 1440, 2160, Default: 1080
 	-f --aformat <format>      The format of the audio. Formats: best, mp3, ogg, wav, opus, Default: mp3
+                                   The "best" option takes the format of the original audio, and may not be specified on the website you took the media from.
 	-a --audio-only            Tells cobalt to only download and output the audio of the link
 	-m --mute-adio             Tells cobalt to mute the audio from the downloaded content
 	-g --twitter-gif           Tells cobalt to download the given twitter content as a gif
 	-o --output <filename>     The output filename. Defaults to the current datetime in the current directory. Make sure to include the proper file extension.
 
-Text piped in through `command | tc get` will be used as the url
+Text piped in through `command | tcb get` will be used as the url
 
 [list]
 tcobalt "list" method syntax
 All this method does is print all supported services and exits
-Usage: tc list
+Usage: tcb list
 
 [bulk]
 tcobalt "bulk" method syntax
 Downloads multiple videos/audios at once
-Usage: tc bulk <verb> <required args> [optional args]
+Usage: tcb bulk <verb> <required args> [optional args]
 
 Verbs:
 	get <url list> [options]
 		- URL list is, you guessed it, a list of URLs, separated by spaces, but not inside quotes
-		- Uses the same options as `tc get`
+		- Uses the same options as `tcb get`
 		- Output filename will be used for each file, with a number prepended to the name for each downloaded file
-		- Options apply for all links. Use `tc execute` to use different options per link
+		- Options apply for all links. Use `tcb execute` to use different options per link
 	execute <filename>
-		- Runs 'tc get' commands from a file, separated by lines
-		- Syntax is the same as command-line tcobalt, just without `tc get` each line
+		- Runs 'tcb get' commands from a file, separated by lines
+		- Syntax is the same as command-line tcobalt, just without `tcb get` each line
 
-Text piped in through `command | tc bulk` will be used as the space-separated url list
+Text piped in through `command | tcb bulk` will be used as the space-separated url list, but dont support GET options
 
 [version]
 tcobalt command line utility v1.0.0
