@@ -1,4 +1,4 @@
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum VideoCodec {
     H264, AV1, VP9
 }
@@ -8,7 +8,7 @@ impl Default for VideoCodec {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct VideoQuality {
     pub quality: u16
 }
@@ -18,7 +18,7 @@ impl Default for VideoQuality {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum AudioFormat {
     BEST, MP3, OGG, WAV, OPUS
 }
@@ -28,11 +28,11 @@ impl Default for AudioFormat {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Help {
     Get, List, Bulk, Help
 }
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Method {
     Get, List, Bulk, Help, Version, CobaltVersion
 }
