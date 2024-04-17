@@ -51,6 +51,7 @@ impl Args {
                             "list" | "l" => self.help_flag = Some(types::Help::List),
                             "bulk" | "b" => self.help_flag = Some(types::Help::Bulk),
                             "help" | "h" => self.help_flag = Some(types::Help::Help),
+                            "examples" | "e" => self.help_flag = Some(types::Help::Examples),
                             _ => self.help_flag = Some(types::Help::Help)
                         },
                         None => self.help_flag = Some(types::Help::Help),

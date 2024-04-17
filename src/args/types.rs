@@ -30,7 +30,7 @@ impl Default for AudioFormat {
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Help {
-    Get, List, Bulk, Help
+    Get, List, Bulk, Help, Examples
 }
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Method {

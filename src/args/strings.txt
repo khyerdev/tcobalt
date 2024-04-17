@@ -13,7 +13,7 @@ Version methods:
 
 You can also type the first letter for a method
 Type "help <method>" for more information about a method and its options
-Type "help syntax" for an overview on tcobalt command syntax
+Type "help examples" for some examples
 
 [get]
 tcobalt "get" method syntax
@@ -76,3 +76,20 @@ vimeo
 vine archive
 vk video & clips (full video+audio only)
 youtube videos, shorts & music
+
+[examples]
+tcobalt command examples:
+tcb get https://www.youtube.com/watch?v=zn5sTDXSp8E -m
+tcb get --vquality 1440 https://www.youtube.com/watch?v=zn5sTDXSp8E
+tcb g -c av1 https://www.youtube.com/watch?v=zn5sTDXSp8E -o rice.mp4
+tcb g -mqof 480 rice.webm vp9 https://www.youtube.com/watch?v=zn5sTDXSp8E
+tcb bulk get https://www.youtube.com/watch?v=zn5sTDXSp8E https://www.youtube.com/watch?v=OnrbdAAokS0 -qo 720 video.mp4
+tcb bulk execute video-list.txt
+tcb b exe /etc/public-videos.tcb
+tcb b e evil
+
+"bulk execute" file example:
+---
+https://www.youtube.com/watch?v=OnrbdAAokS0 -o 1.mp4
+https://www.youtube.com/watch?v=zn5sTDXSp8E -mo 2.mp4
+---
