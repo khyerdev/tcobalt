@@ -20,7 +20,7 @@ impl Default for VideoQuality {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum AudioFormat {
-    MP3, OGG, WAV, OPUS
+    BEST, MP3, OGG, WAV, OPUS
 }
 impl Default for AudioFormat {
     fn default() -> Self {
