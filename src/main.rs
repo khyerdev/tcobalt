@@ -25,11 +25,14 @@ async fn main() -> std::process::ExitCode {
             args::types::Help::List => println!("{}", tcargs::strings::get_mod("list")),
             args::types::Help::Bulk => println!("{}", tcargs::strings::get_mod("bulk")),
             args::types::Help::Get => println!("{}", tcargs::strings::get_mod("get")),
+            args::types::Help::Examples => println!("{}", tcargs::strings::get_mod("examples")),
         }
         return std::process::ExitCode::SUCCESS;
     }
-    match args.method.expect("Failed to catch invalid method early") {
-        args::types::Method::Get => todo!(),
+    match args.method.clone().expect("Failed to catch invalid method early") {
+        args::types::Method::Get => {
+            println!("{:#?}", args);
+        },
         args::types::Method::List => println!("{}", tcargs::strings::get_mod("supported")),
         args::types::Method::Bulk => todo!(),
         args::types::Method::Help => unreachable!(),

@@ -1,3 +1,5 @@
+use std::io::Read;
+
 use self::types::VideoQuality;
 
 pub mod types;
@@ -61,6 +63,8 @@ impl Args {
                     self.method = Some(types::Method::Get);
                     let mut idx = 1;
                     let mut expected: Vec<ExpectedFlags> = Vec::new();
+                    // let mut buf: Vec<u8> = Vec::new();
+                    // println!("{}", std::io::stdin().read_to_end(&mut buf).unwrap());
                     while let Some(arg) = self.raw.get(idx+1) {
                         idx += 1;
                         if expected.len() == 0 {
