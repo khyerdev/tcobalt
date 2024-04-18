@@ -39,7 +39,15 @@ async fn main() -> std::process::ExitCode {
         args::types::Method::Version => println!("{}", tcargs::strings::get_mod("version")),
         args::types::Method::CobaltVersion => {
             let ver = reqwest::get("https://co.wuk.sh/api/serverInfo").await.unwrap().text().await.unwrap();
-            let stats = json::parse(ver).expect("cobalt server returned invalid json");
+            let stats = match json::parse(ver) {
+                Ok(j) => j,
+                Err(e) => {
+                    eprintln!("Cobalt server returned improper JSON");
+                    eprintln!("JSON parse error: {e}");
+                    eprintln!("Either Cobalt is down, or you somehow got blocked specifically in this application.");
+                    return std::process::ExitCode::FAILURE;
+                }
+            };
             let version = stats.get("version").unwrap().get_str().unwrap();
             let commit = stats.get("commit").unwrap().get_str().unwrap();
             let branch = stats.get("branch").unwrap().get_str().unwrap();
