@@ -31,7 +31,7 @@ Options:
 	-g --twitter-gif           Tells cobalt to download the given twitter content as a gif
 	-o --output <filename>     The output filename. Defaults to the current datetime in the current directory. Make sure to include the proper file extension.
 
-Text piped in through `command | tcb get` will be used as the url
+Add a - as the last argument if you want text piped in through `command | tcb get` to be used as the url
 
 [list]
 tcobalt "list" method syntax
