@@ -63,9 +63,9 @@ impl Args {
                     self.method = Some(types::Method::Get);
                     let mut idx = 1;
                     let mut expected: Vec<ExpectedFlags> = Vec::new();
-                    // let mut buf: Vec<u8> = Vec::new();
-                    // println!("{}", std::io::stdin().read_to_end(&mut buf).unwrap());
+                    let mut stdin = false;
                     while let Some(arg) = self.raw.get(idx+1) {
+                        stdin = false;
                         idx += 1;
                         if expected.len() == 0 {
                             let mut short = false;
@@ -79,15 +79,17 @@ impl Args {
                                 "--output" => expected.push(ExpectedFlags::Output),
                                 _ => {
                                     if self.c_url == None && arg.contains("https://") {
-                                        self.c_url = Some(arg.clone()); // TODO: pipe url through stdin
+                                        self.c_url = Some(arg.clone());
                                         continue;
-                                    } else if self.c_url.is_some() && arg.contains("https://") {
+                                    }
+                                    if self.c_url.is_some() && arg.contains("https://") {
                                         return Err(types::ParseError::throw_invalid("You cannot have 2 URLs in the same GET command"));
                                     }
                                     for c in arg.chars() {
                                         if !short {
                                             if c == '-' {
                                                 short = true;
+                                                stdin = true;
                                             } else {
                                                 return Err(types::ParseError::throw_invalid(&format!("Unrecognized argument: {arg}")));
                                             }
@@ -142,6 +144,31 @@ impl Args {
                             }
                         }
                     }
+                    if stdin {
+                        let mut buf = String::new();
+                        std::io::stdin().read_to_string(&mut buf).unwrap_or(0);
+                        if self.c_url == None && buf.contains("https://") {
+                            self.c_url = Some(buf.trim().to_string());
+                        } else {
+                            if self.c_url.is_some() {
+                                return Err(types::ParseError::throw_invalid("You cannot have 2 URLs in the same GET command"));
+                            }
+                            return Err(types::ParseError::throw_invalid("URL from STDIN is invalid."))
+                        }
+                    }
+                    if self.c_url == None {
+                        return Err(types::ParseError::throw_incomplete("Missing URL from GET method"))
+                    }
+                    if expected.len() > 0 {
+                        let mut missing = String::new();
+                        for (i, v) in expected.iter().enumerate() {
+                            if i > 0 {
+                                missing.push_str(", ")
+                            }
+                            missing.push_str(&format!("{v:?}"));
+                        }
+                        return Err(types::ParseError::throw_incomplete(&format!("The following flags were specified but their values were not: {missing}")));
+                    }
                 },
                 "bulk" | "b" => todo!(),
                 "list" | "l" => self.method = Some(types::Method::List),
@@ -164,6 +191,7 @@ impl Args {
     }
 }
 
+#[derive(Debug)]
 enum ExpectedFlags {
     VideoCodec, VideoQuality, AudioFormat, Output,
 }
