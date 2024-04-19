@@ -3,6 +3,8 @@ mod args;
 use args as tcargs;
 use args::Args;
 
+const VERSION: &str = include_str!("version");
+
 #[tokio::main]
 async fn main() -> std::process::ExitCode {
     if std::env::args().len() == 1 {
@@ -36,10 +38,10 @@ async fn main() -> std::process::ExitCode {
         args::types::Method::List => println!("{}", tcargs::strings::get_mod("supported")),
         args::types::Method::Bulk => todo!(),
         args::types::Method::Help => unreachable!(),
-        args::types::Method::Version => println!("{}", tcargs::strings::get_mod("version")),
+        args::types::Method::Version => println!("{}", tcargs::strings::get_mod("version").replace("{}", VERSION.trim())),
         args::types::Method::CobaltVersion => {
             let request = reqwest::Client::new().get("https://co.wuk.sh/api/serverInfo")
-                .header("User-Agent", "tcobalt v1.0.0");
+                .header("User-Agent", &format!("tcobalt {}", VERSION.trim()));
             let ver = match request.send().await {
                 Ok(res) => res.text().await.unwrap_or("{\"version\":\"unknown\",\"commit\":\"unknown\",\"branch\":\"unknown\"}".to_string()),
                 Err(e) => {
@@ -47,13 +49,13 @@ async fn main() -> std::process::ExitCode {
                     return std::process::ExitCode::FAILURE;
                 }
             };
-            let stats = match json::parse(ver.clone()) {
+            let stats = match json::parse(ver/* .clone() */) {
                 Ok(j) => j,
                 Err(e) => {
                     eprintln!("Cobalt server returned improper JSON");
                     eprintln!("JSON parse error: {e}");
                     eprintln!("Either Cobalt is down, or you somehow got blocked specifically in this application.\n");
-                    eprintln!("Cobalt returned response: {:?}", ver);
+                    // eprintln!("Cobalt returned response: {:?}", ver);
                     return std::process::ExitCode::FAILURE;
                 }
             };
