@@ -38,13 +38,22 @@ async fn main() -> std::process::ExitCode {
         args::types::Method::Help => unreachable!(),
         args::types::Method::Version => println!("{}", tcargs::strings::get_mod("version")),
         args::types::Method::CobaltVersion => {
-            let ver = reqwest::get("https://co.wuk.sh/api/serverInfo").await.unwrap().text().await.unwrap();
-            let stats = match json::parse(ver) {
+            let request = reqwest::Client::new().get("https://co.wuk.sh/api/serverInfo")
+                .header("User-Agent", "tcobalt v1.0.0");
+            let ver = match request.send().await {
+                Ok(res) => res.text().await.unwrap_or("{\"version\":\"unknown\",\"commit\":\"unknown\",\"branch\":\"unknown\"}".to_string()),
+                Err(e) => {
+                    eprintln!("Cobalt server did not respond: {}", e.to_string());
+                    return std::process::ExitCode::FAILURE;
+                }
+            };
+            let stats = match json::parse(ver.clone()) {
                 Ok(j) => j,
                 Err(e) => {
                     eprintln!("Cobalt server returned improper JSON");
                     eprintln!("JSON parse error: {e}");
-                    eprintln!("Either Cobalt is down, or you somehow got blocked specifically in this application.");
+                    eprintln!("Either Cobalt is down, or you somehow got blocked specifically in this application.\n");
+                    eprintln!("Cobalt returned response: {:?}", ver);
                     return std::process::ExitCode::FAILURE;
                 }
             };
