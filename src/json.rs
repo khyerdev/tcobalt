@@ -122,7 +122,7 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                             current_array.push(JsonValue::Object(current_subobject.clone()));
                             current_subobject.clear();
                         },
-                        0 => break,
+                        0 => { key_level = 0; break },
                         _ => {
                             assert_eq!(history.pop().unwrap(), ReadHistory::Object);
                             temp_object = current_subobject.clone();
@@ -138,7 +138,7 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                             parsed_map.insert(key_array.pop().unwrap(), JsonValue::Object(current_subobject.clone()));
                             current_subobject.clear();
                         },
-                        0 => break,
+                        0 => { key_level = 0; break },
                         _ => {
                             assert_eq!(history.pop().unwrap(), ReadHistory::Object);
                             temp_object = current_subobject.clone();
@@ -351,7 +351,7 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                                                 current_array.push(JsonValue::Object(current_subobject.clone()));
                                                 current_subobject.clear();
                                             },
-                                            0 => break,
+                                            0 => { key_level = 0; break },
                                             _ => {
                                                 temp_object = current_subobject.clone();
                                                 current_subobject = subobject_storage.pop().unwrap();
@@ -366,7 +366,7 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                                                 current_subobject.clear();
 
                                             },
-                                            0 => break,
+                                            0 => { key_level = 0; break },
                                             _ => {
                                                 temp_object = current_subobject.clone();
                                                 current_subobject = subobject_storage.pop().unwrap();
@@ -435,7 +435,7 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                                         current_array.push(JsonValue::Object(current_subobject.clone()));
                                         current_subobject.clear();
                                     },
-                                    0 => break,
+                                    0 => { key_level = 0; break },
                                     _ => {
                                         assert_eq!(history.pop().unwrap(), ReadHistory::Object);
                                         temp_object = current_subobject.clone();
@@ -451,7 +451,7 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                                         parsed_map.insert(key_array.pop().unwrap(), JsonValue::Object(current_subobject.clone()));
                                         current_subobject.clear();
                                     },
-                                    0 => break,
+                                    0 => { key_level = 0; break },
                                     _ => {
                                         assert_eq!(history.pop().unwrap(), ReadHistory::Object);
                                         temp_object = current_subobject.clone();
@@ -605,6 +605,10 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
             }
         }
     };
+
+    if key_level != 0 || object_level != 0 {
+        return Err(format!("The given JSON is incomplete: {key_level}-{object_level} (both need to be 0)"));
+    }
 
     Ok(parsed_map)
 }
