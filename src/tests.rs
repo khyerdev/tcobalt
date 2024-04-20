@@ -93,7 +93,7 @@ fn json_parse() {
     use std::collections::HashMap;
     use crate::json::{self, JsonValue as Val};
 
-    let inline_str = "{'key':\"val\",\"num\":42,\"bool\":true,'none':null,\"list\":[\"member1\",\"member2\"],\"subobj\":{\"subkey\":\"val\"}}";
+    let inline_str = "{'key \"key\"':\"val\",\"num\":42,\"bool\":true,'none':null,\"list\":[\"member1\",\"member2\"],\"subobj\":{\"subkey\":\"val\"}}";
     let block_str = "{
         \"key\": \"val\",
         \"num\": 42,
@@ -103,9 +103,9 @@ fn json_parse() {
             \"member1\",
             \"member \\\"two\\\"\"
         ],
-        \"inline list\": [\"member1\", 'member2', 99, false, {\"member key\": \"val\", \"ruhhhh\": [\"nuh uh\"]}, null],
+        \"inline list\": [\"member1\", 'member2 \\\'two\\\'', 99, false, {\"member key\": \"val\", \"ruhhhh\": [\"nuh uh\"]}, null],
         \"float\": 6752.88,
-        \"subobj\": {
+        \"subobj 'object'\": {
             \"subkey\": \"val\",
             \"sublist\": [\"only member\"]
         }
@@ -115,7 +115,7 @@ fn json_parse() {
     let block_parsed = json::parse(block_str).unwrap();
 
     let proper_inline: HashMap<String, Val> = HashMap::from([
-        ("key".into(), Val::Str("val".into())),
+        ("key \"key\"".into(), Val::Str("val".into())),
         ("num".into(), Val::Int(42)),
         ("bool".into(), Val::Bool(true)),
         ("none".into(), Val::Null),
@@ -138,7 +138,7 @@ fn json_parse() {
         ])),
         ("inline list".into(), Val::Array(vec![
             Val::Str("member1".into()),
-            Val::Str("member2".into()),
+            Val::Str("member2 'two'".into()),
             Val::Int(99),
             Val::Bool(false),
             Val::Object(HashMap::from([
@@ -150,7 +150,7 @@ fn json_parse() {
             Val::Null
         ])),
         ("float".into(), Val::Float(6752.88)),
-        ("subobj".into(), Val::Object(HashMap::from([
+        ("subobj 'object'".into(), Val::Object(HashMap::from([
             ("subkey".into(), Val::Str("val".into())),
             ("sublist".into(), Val::Array(vec![
                 Val::Str("only member".into())
