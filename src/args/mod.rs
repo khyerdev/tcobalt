@@ -3,13 +3,13 @@ use std::io::Read;
 pub mod types;
 pub mod strings;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Args {
     pub raw: Vec<String>,
     pub parsed: bool,
     pub method: Option<types::Method>,
     pub c_url: Option<String>,
-    pub c_bulk_array: Option<Vec<Args>>,
+    pub bulk_array: Option<Vec<Args>>,
     pub c_video_codec: types::VideoCodec,
     pub c_video_quality: u16,
     pub c_audio_format: types::AudioFormat,
@@ -34,7 +34,7 @@ impl Args {
             out_filename: None,
             help_flag: None,
             method: None,
-            c_bulk_array: None,
+            bulk_array: None,
         }
     }
 
@@ -207,7 +207,7 @@ impl Args {
                                                 clone
                                             });
                                         }
-                                        self.c_bulk_array = Some(arg_array);
+                                        self.bulk_array = Some(arg_array);
                                     },
                                     Err(e) => return Err(types::ParseError::throw_bulkerr(&format!("Invalid flags | {}", e.print()))),
                                 }
@@ -224,7 +224,7 @@ impl Args {
                                                 Err(e) => return Err(types::ParseError::throw_bulkerr(&format!("On line {} | {}", i+1, e.print())))
                                             }
                                         }
-                                        self.c_bulk_array = Some(arg_array);
+                                        self.bulk_array = Some(arg_array);
                                     } else {
                                         return Err(types::ParseError::throw_invalid("The file \"{filename}\" either doesnt exist, or doesn't have proper permissions"));
                                     }
