@@ -1,4 +1,94 @@
 #[test]
+fn args_help() {
+    use crate::args::*;
+
+    let help_args = Args::override_args(&["help"]).parse().unwrap();
+    let help_get_args = Args::override_args(&["help", "get"]).parse().unwrap();
+    let help_list_args = Args::override_args(&["help", "list"]).parse().unwrap();
+    let help_bulk_args = Args::override_args(&["help", "bulk"]).parse().unwrap();
+    let help_examples = Args::override_args(&["help", "examples"]).parse().unwrap();
+
+    assert_eq!(help_args.help_flag, Some(types::Help::Help));
+    assert_eq!(help_get_args.help_flag, Some(types::Help::Get));
+    assert_eq!(help_list_args.help_flag, Some(types::Help::List));
+    assert_eq!(help_bulk_args.help_flag, Some(types::Help::Bulk));
+    assert_eq!(help_examples.help_flag, Some(types::Help::Examples));
+}
+
+#[test]
+fn args_get() {
+    use crate::args::*;
+    let url = "https://www.youtube.com/watch?v=zn5sTDXSp8E";
+
+    let args1 = Args::override_args(&["get", url]).parse().unwrap();
+    let args2 = Args::override_args(&["get", url, "--vcodec", "av1"]).parse().unwrap();
+    let args3 = Args::override_args(&["get", "--vquality", "1440", url]).parse().unwrap();
+    let args4 = Args::override_args(&["get", "-cq", "vp9", "720", url]).parse().unwrap();
+    let args5 = Args::override_args(&["get", url, "-af", "ogg", "--output", "foo.ogg"]).parse().unwrap();
+    let args6 = Args::override_args(&["get", url, "-gmo", "bar.gif"]).parse().unwrap();
+
+    assert_eq!(args1.method, Some(types::Method::Get));
+    assert_eq!(args1.c_url, Some(url.to_string()));
+    assert_eq!(args1.c_video_codec, types::VideoCodec::H264);
+    assert_eq!(args1.c_video_quality, 1080);
+    assert_eq!(args1.c_audio_format, types::AudioFormat::MP3);
+    assert_eq!(args1.c_audio_only, false);
+    assert_eq!(args1.c_audio_muted, false);
+    assert_eq!(args1.c_twitter_gif, false);
+
+    assert_eq!(args2.c_video_codec, types::VideoCodec::AV1);
+    assert_eq!(args3.c_video_quality, 1440);
+    assert_eq!(args3.c_url, Some(url.to_string()));
+    assert_eq!(args4.c_video_codec, types::VideoCodec::VP9);
+    assert_eq!(args4.c_video_quality, 720);
+    assert_eq!(args5.c_audio_only, true);
+    assert_eq!(args5.c_audio_format, types::AudioFormat::OGG);
+    assert_eq!(args5.out_filename, Some("foo.ogg".into()));
+    assert_eq!(args6.c_twitter_gif, true);
+    assert_eq!(args6.c_audio_muted, true);
+    assert_eq!(args6.out_filename, Some("bar.gif".into()));
+}
+
+#[test]
+fn args_get_incorrect() {
+    use crate::args::*;
+    let url = "https://www.youtube.com/watch?v=zn5sTDXSp8E";
+
+    Args::override_args(&["get", url, url]).parse().unwrap_err();
+    Args::override_args(&["get", "-q", "1080"]).parse().unwrap_err();
+    Args::override_args(&["get", "-q", "1081", url]).parse().unwrap_err();
+    Args::override_args(&["get", "-q", url]).parse().unwrap_err();
+    Args::override_args(&["get", url, "-af"]).parse().unwrap_err();
+    Args::override_args(&["get", url, "-cafamgo"]).parse().unwrap_err();
+    Args::override_args(&["get"]).parse().unwrap_err();
+}
+
+#[test]
+fn args_bulk_get() {
+    use crate::args::*;
+    let url1 = "https://www.youtube.com/watch?v=zn5sTDXSp8E";
+    let url2 = "https://www.youtube.com/watch?v=OnrbdAAokS0";
+
+    let bulk1 = Args::override_args(&["bulk", "get", url2, url1,]).parse().unwrap();
+    let mut dummy_get_1 = Args::override_args(&["get", "https://"]).parse().unwrap();
+    dummy_get_1.c_url = Some(url1.into());
+    let mut dummy_get_2 = Args::override_args(&["get", "https://"]).parse().unwrap();
+    dummy_get_2.c_url = Some(url2.into());
+    eprintln!("{:#?}", bulk1.bulk_array.clone().unwrap());
+    assert_eq!(bulk1.bulk_array.clone().unwrap()[0], dummy_get_1);
+    assert_eq!(bulk1.bulk_array.unwrap()[1], dummy_get_2);
+    
+    let bulk2 = Args::override_args(&["bulk", "get", url2, "-cqm", "av1", "1440", url1,]).parse().unwrap();
+    let mut dummy_get_1 = Args::override_args(&["get", "https://", "-cqm", "av1", "1440"]).parse().unwrap();
+    dummy_get_1.c_url = Some(url1.into());
+    let mut dummy_get_2 = Args::override_args(&["get", "https://", "-cqm", "av1", "1440"]).parse().unwrap();
+    dummy_get_2.c_url = Some(url2.into());
+    eprintln!("{:#?}", bulk2.bulk_array.clone().unwrap());
+    assert_eq!(bulk2.bulk_array.clone().unwrap()[0], dummy_get_1);
+    assert_eq!(bulk2.bulk_array.unwrap()[1], dummy_get_2);
+}
+
+#[test]
 fn json_parse() {
     use std::collections::HashMap;
     use crate::json::{self, JsonValue as Val};
