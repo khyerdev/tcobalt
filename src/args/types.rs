@@ -9,16 +9,6 @@ impl Default for VideoCodec {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
-pub struct VideoQuality {
-    pub quality: u16
-}
-impl Default for VideoQuality {
-    fn default() -> Self {
-        Self { quality: 1080 }
-    }
-}
-
-#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum AudioFormat {
     BEST, MP3, OGG, WAV, OPUS
 }
@@ -40,7 +30,8 @@ pub enum Method {
 #[derive(Debug, PartialEq, Eq)]
 enum ParseErrType {
     InvalidArg,
-    Incomplete
+    Incomplete,
+    BulkParseError
 }
 #[derive(Debug)]
 pub struct ParseError {
@@ -57,6 +48,12 @@ impl ParseError {
     pub fn throw_invalid(message: &str) -> Self {
         Self {
             err_type: ParseErrType::InvalidArg,
+            message: message.to_string()
+        }
+    }
+    pub fn throw_bulkerr(message: &str) -> Self {
+        Self {
+            err_type: ParseErrType::BulkParseError,
             message: message.to_string()
         }
     }
