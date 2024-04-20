@@ -18,6 +18,7 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
     let mut last_push_object = false;
     let mut new_object = false;
     let mut new_array = false;
+    let mut using_quote = '\"';
 
     let mut key_buf: String = String::new();
     let mut key_array: Vec<String> = Vec::new();
@@ -162,11 +163,16 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                         '"' | '\'' => {
                             reading = Reader::Key;
                             ignore_whitespace = false;
+                            using_quote = c;
                         },
                         _ => return Err(format!("Double quote expected, got '{c}' at char {i}"))
                     },
                     Reader::Key => match c {
                         '"' | '\'' => {
+                            if c != using_quote {
+                                key_buf.push(c);
+                                continue;
+                            }
                             reading = Reader::None;
                             key_level = 1;
                             ignore_whitespace = true;
@@ -510,6 +516,7 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                                 history.push(ReadHistory::Array);
                             },
                             '\"' | '\'' => {
+                                using_quote = c;
                                 reading = Reader::ValStr;
                                 ignore_whitespace = false;
                                 history.push(ReadHistory::Str);
@@ -549,6 +556,10 @@ pub fn parse(json: impl ToString) -> Result<HashMap<String, JsonValue>, String> 
                         Reader::Key => unreachable!(),
                         Reader::ValStr => match c {
                             '"' | '\'' => {
+                                if c != using_quote {
+                                    str_buf.push(c);
+                                    continue;
+                                }
                                 reading = Reader::None;
                                 ignore_whitespace = true;
                                 if is_array {
