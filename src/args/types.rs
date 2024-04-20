@@ -17,6 +17,11 @@ impl Default for AudioFormat {
         Self::MP3
     }
 }
+impl AudioFormat {
+    fn print(&self) -> String {
+        format!("{self:?}").to_lowercase()
+    }
+}
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Help {
