@@ -170,9 +170,9 @@ impl Args {
                 },
                 "bulk" | "b" => {
                     if let Some(action) = self.raw.get(2) {
+                        self.method = Some(types::Method::Bulk);
                         match action.as_str() {
-                            "get" => {
-                                self.method = Some(types::Method::Bulk);
+                            "get" | "g" => {
                                 let mut url_list: Vec<String> = Vec::new();
                                 let mut dummy_args = self.raw.clone();
                                 let mut has_url = false;
@@ -206,7 +206,26 @@ impl Args {
                                     Err(e) => return Err(types::ParseError::throw_bulkerr(&format!("Invalid flags | {}", e.print()))),
                                 }
                             },
-                            "execute" => todo!(),
+                            "execute" | "exe" | "e" => {
+                                if let Some(filename) = self.raw.get(3) {
+                                    if let Ok(contents) = std::fs::read_to_string(filename) {
+                                        let mut arg_array: Vec<Self> = Vec::new();
+                                        for (i, line) in contents.lines().enumerate() {
+                                            let mut args_raw = line.split(" ").collect::<Vec<&str>>();
+                                            args_raw.insert(0, "get");
+                                            match Self::override_args(args_raw.as_slice()).parse() {
+                                                Ok(args) => arg_array.push(args),
+                                                Err(e) => return Err(types::ParseError::throw_bulkerr(&format!("On line {} | {}", i+1, e.print())))
+                                            }
+                                        }
+                                        self.c_bulk_array = Some(arg_array);
+                                    } else {
+                                        return Err(types::ParseError::throw_invalid("The file \"{filename}\" either doesnt exist, or doesn't have proper permissions"));
+                                    }
+                                } else {
+                                    return Err(types::ParseError::throw_incomplete("Bulk execute action is missing the filename to execute commands from"));
+                                }
+                            },
                             _ => return Err(types::ParseError::throw_invalid(&format!("Invalid action: {action}")))
                         }
                     } else {
