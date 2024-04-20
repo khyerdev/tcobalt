@@ -133,10 +133,10 @@ impl Args {
                                     }
                                 },
                                 ExpectedFlags::Output => {
-                                    if arg.contains(".mp3") || arg.contains(".ogg") || arg.contains(".wav") || arg.contains(".opus") || arg.contains(".mp4") || arg.contains(".webm") {
+                                    if arg.contains(".mp3") || arg.contains(".ogg") || arg.contains(".wav") || arg.contains(".opus") || arg.contains(".mp4") || arg.contains(".webm") || arg.contains(".gif") {
                                         self.out_filename = Some(arg.clone())
                                     } else {
-                                        return Err(types::ParseError::throw_invalid("Output filename must be a video file type (supported: mp4/webm), or an audio file type (supported: mp3/ogg/wav/opus)\nMake sure you choose the right file type for the chosen codec/format!"));
+                                        return Err(types::ParseError::throw_invalid("Output filename must be a video file type (supported: mp4/webm/gif), or an audio file type (supported: mp3/ogg/wav/opus)\nMake sure you choose the right file type for the chosen codec/format!"));
                                     }
                                 }
                             }
