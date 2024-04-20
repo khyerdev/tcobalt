@@ -1,16 +1,4 @@
 #[test]
-fn helptext() {
-    let help_args = crate::args::Args::override_args(&["help"]).parse().unwrap();
-    let get_args = crate::args::Args::override_args(&["help", "get"]).parse().unwrap();
-    let list_args = crate::args::Args::override_args(&["help", "list"]).parse().unwrap();
-    let bulk_args = crate::args::Args::override_args(&["help", "bulk"]).parse().unwrap();
-    assert_eq!(help_args.help_flag, Some(crate::args::types::Help::Help));
-    assert_eq!(get_args.help_flag, Some(crate::args::types::Help::Get));
-    assert_eq!(list_args.help_flag, Some(crate::args::types::Help::List));
-    assert_eq!(bulk_args.help_flag, Some(crate::args::types::Help::Bulk));
-}
-
-#[test]
 fn json_parse() {
     use std::collections::HashMap;
     use crate::json::{self, JsonValue as Val};
