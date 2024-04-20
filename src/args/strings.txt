@@ -31,7 +31,7 @@ Options:
 	-g --twitter-gif           Tells cobalt to download the given twitter content as a gif
 	-o --output <filename>     The output filename. Defaults to the current datetime in the current directory. Make sure to include the proper file extension.
 
-Add a - as the last argument if you want text piped in through `command | tcb get` to be used as the url
+Add a + as an argument if you want text piped in through `command | tcb get` to be used as the url
 
 [list]
 tcobalt "list" method syntax
@@ -53,7 +53,7 @@ Actions:
 		- Runs 'tcb get' commands from a file, separated by lines
 		- Syntax is the same as command-line tcobalt, just without `tcb get` each line
 
-Text piped in through `command | tcb bulk` will be used as the space-separated url list, but dont support GET options
+Include a + as an argument for text piped in through `command | tcb bulk` to be used as the space-separated url list
 
 [version]
 tcobalt command line utility {}
