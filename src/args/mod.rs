@@ -40,7 +40,13 @@ impl Args {
 
     pub fn parse(mut self) -> Result<Self, types::ParseError> {
         self.parsed = true;
-        self.raw = self.raw.iter().map(|str| str.to_lowercase()).collect();
+        self.raw = self.raw.iter().map(|str| {
+            if !str.contains("https://") {
+                str.to_lowercase()
+            } else {
+                str.into()
+            }
+        }).collect();
         match self.raw.get(1) {
             Some(method) => match method.as_str() {
                 "help" | "-h" | "--help" | "h" => {
