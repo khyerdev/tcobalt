@@ -6,7 +6,7 @@ Methods:
 	get <url> [options]
 	list
 	help [method]
-	bulk <verb> <args>
+	bulk <action> <args>
 Version methods:
 	version
 	cobalt-version
@@ -41,9 +41,9 @@ Usage: tcb list
 [bulk]
 tcobalt "bulk" method syntax
 Downloads multiple videos/audios at once
-Usage: tcb bulk <verb> <required args> [optional args]
+Usage: tcb bulk <action> <required args> [optional args]
 
-Verbs:
+Actions:
 	get <url list> [options]
 		- URL list is, you guessed it, a list of URLs, separated by spaces, but not inside quotes
 		- Uses the same options as `tcb get`
