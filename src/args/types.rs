@@ -7,6 +7,11 @@ impl Default for VideoCodec {
         Self::H264
     }
 }
+impl VideoCodec {
+    pub fn print(&self) -> String {
+        format!("{self:?}").to_lowercase()
+    }
+}
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum AudioFormat {
@@ -18,7 +23,7 @@ impl Default for AudioFormat {
     }
 }
 impl AudioFormat {
-    fn print(&self) -> String {
+    pub fn print(&self) -> String {
         format!("{self:?}").to_lowercase()
     }
 }
