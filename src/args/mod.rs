@@ -30,7 +30,7 @@ impl Args {
             c_audio_format: types::AudioFormat::MP3,
             c_audio_only: false,
             c_audio_muted: false,
-            c_twitter_gif: true,
+            c_twitter_gif: false,
             out_filename: None,
             help_flag: None,
             method: None,
