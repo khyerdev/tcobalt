@@ -1,7 +1,5 @@
 use std::io::Read;
 
-use self::types::VideoQuality;
-
 pub mod types;
 pub mod strings;
 
@@ -13,7 +11,7 @@ pub struct Args {
     pub c_url: Option<String>,
     pub c_bulk_array: Option<Vec<Args>>,
     pub c_video_codec: types::VideoCodec,
-    pub c_video_quality: types::VideoQuality,
+    pub c_video_quality: u16,
     pub c_audio_format: types::AudioFormat,
     pub c_audio_only: bool,
     pub c_audio_muted: bool,
@@ -28,7 +26,7 @@ impl Args {
             parsed: false,
             c_url: None,
             c_video_codec: types::VideoCodec::H264,
-            c_video_quality: types::VideoQuality::default(),
+            c_video_quality: 1080,
             c_audio_format: types::AudioFormat::MP3,
             c_audio_only: false,
             c_audio_muted: false,
@@ -46,7 +44,7 @@ impl Args {
         match self.raw.get(1) {
             Some(method) => match method.as_str() {
                 "help" | "-h" | "--help" | "h" => {
-                    self.method = Some(types::Method::Version);
+                    self.method = Some(types::Method::Help);
                     match self.raw.get(2) {
                         Some(help) => match help.as_str() {
                             "get" | "g" => self.help_flag = Some(types::Help::Get),
@@ -65,7 +63,6 @@ impl Args {
                     let mut expected: Vec<ExpectedFlags> = Vec::new();
                     let mut stdin = false;
                     while let Some(arg) = self.raw.get(idx+1) {
-                        stdin = false;
                         idx += 1;
                         if expected.len() == 0 {
                             let mut short = false;
@@ -89,6 +86,7 @@ impl Args {
                                         if !short {
                                             if c == '-' {
                                                 short = true;
+                                            } else if c == '+' {
                                                 stdin = true;
                                             } else {
                                                 return Err(types::ParseError::throw_invalid(&format!("Unrecognized argument: {arg}")));
@@ -120,7 +118,7 @@ impl Args {
                                 },
                                 ExpectedFlags::VideoQuality => {
                                     match arg.as_str() {
-                                        "144" | "480" | "720" | "1080" | "1440" | "2160" => self.c_video_quality = VideoQuality { quality: arg.parse().unwrap() },
+                                        "144" | "480" | "720" | "1080" | "1440" | "2160" => self.c_video_quality = arg.parse().unwrap(),
                                         _ => return Err(types::ParseError::throw_invalid(&format!("Invalid video quality: {arg}")))
                                     }
                                 },
@@ -170,7 +168,51 @@ impl Args {
                         return Err(types::ParseError::throw_incomplete(&format!("The following flags were specified but their values were not: {missing}")));
                     }
                 },
-                "bulk" | "b" => todo!(),
+                "bulk" | "b" => {
+                    if let Some(action) = self.raw.get(2) {
+                        match action.as_str() {
+                            "get" => {
+                                self.method = Some(types::Method::Bulk);
+                                let mut url_list: Vec<String> = Vec::new();
+                                let mut dummy_args = self.raw.clone();
+                                let mut has_url = false;
+                                (0..dummy_args.len()).rev().for_each(|i| {
+                                    if dummy_args[i].contains("https://") {
+                                        has_url = true;
+                                        url_list.push(dummy_args[i].clone());
+                                        dummy_args.remove(i);
+                                    }
+                                });
+                                if !has_url {
+                                    return Err(types::ParseError::throw_incomplete("Bulk get action is missing at least 1 URL"));
+                                }
+                                (0..=2).for_each(|_| {
+                                    dummy_args.remove(0);
+                                });
+                                let get_flags = dummy_args.iter().map(|s| s.as_str()).collect::<Vec<&str>>();
+                                let get_flags = Self::override_args(&[&["get", "https://"], get_flags.as_slice()].concat()).parse();
+                                match get_flags {
+                                    Ok(flags) => {
+                                        let mut arg_array: Vec<Self> = Vec::new();
+                                        for url in url_list {
+                                            arg_array.push({
+                                                let mut clone = flags.clone();
+                                                clone.c_url = Some(url);
+                                                clone
+                                            });
+                                        }
+                                        self.c_bulk_array = Some(arg_array);
+                                    },
+                                    Err(e) => return Err(types::ParseError::throw_bulkerr(&format!("Invalid flags | {}", e.print()))),
+                                }
+                            },
+                            "execute" => todo!(),
+                            _ => return Err(types::ParseError::throw_invalid(&format!("Invalid action: {action}")))
+                        }
+                    } else {
+                        return Err(types::ParseError::throw_incomplete("Action is missing for bulk download"));
+                    }
+                },
                 "list" | "l" => self.method = Some(types::Method::List),
                 "version" | "v" | "-v" | "--version" => self.method = Some(types::Method::Version),
                 "cobalt-version" | "cv" | "c" => self.method = Some(types::Method::CobaltVersion),
@@ -184,7 +226,7 @@ impl Args {
 
     pub fn override_args(args: &[&str]) -> Self {
         let mut args = args.to_vec().iter().map(|str| str.to_string()).collect::<Vec<String>>();
-        args.insert(0, "tc".to_string());
+        args.insert(0, "tcb".to_string());
         let mut template = Self::get();
         template.raw = args;
         template

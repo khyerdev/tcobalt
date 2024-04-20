@@ -35,8 +35,10 @@ async fn main() -> std::process::ExitCode {
         args::types::Method::Get => {
             println!("{:#?}", args);
         },
+        args::types::Method::Bulk => {
+            println!("{:#?}", args);
+        },
         args::types::Method::List => println!("{}", tcargs::strings::get_mod("supported")),
-        args::types::Method::Bulk => todo!(),
         args::types::Method::Help => unreachable!(),
         args::types::Method::Version => println!("{}", tcargs::strings::get_mod("version").replace("{}", VERSION.trim())),
         args::types::Method::CobaltVersion => {
