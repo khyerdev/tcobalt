@@ -53,8 +53,6 @@ Actions:
 		- Runs 'tcb get' commands from a file, separated by lines
 		- Syntax is the same as command-line tcobalt, just without `tcb get` each line
 
-Include a + as an argument for text piped in through `command | tcb bulk` to be used as the space-separated url list
-
 [version]
 tcobalt command line utility {}
 Copyright (c) 2024 Khyernet
