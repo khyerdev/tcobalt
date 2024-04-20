@@ -143,7 +143,32 @@ fn empty_json() {
 }
 
 #[test]
-#[should_panic]
-fn space_is_control() {
-    assert!(' '.is_control());
+fn incorrect_json() {
+    use crate::json;
+
+    let missing_val_1 = "{\"key\"}";
+    let missing_val_2 = "{\"key\":}";
+    let missing_val_3 = "{\"key\":\"}";
+    let missing_bracket_1 = "{\"key\":{\"key1\": \"val\"}";
+    let missing_bracket_2 = "{\"key\":\"key1\": \"val\"}}";
+    let missing_bracket_3 = "{\"key\":[\"val1\", \"val2\"}";
+    let missing_bracket_4 = "{\"key\":\"key1\", \"val\"]}";
+    let no_comma_1 = "{\"key\": [\"val1\" \"val2\"]}";
+    let no_comma_2 = "{\"key\": [\"val1\", \"val2\"] \"key2\": \"val3\"}";
+    let no_comma_3 = "{\"key\": {\"key1\": \"val1\"} \"key2\": \"val2\"}";
+    let colon_in_array = "{\"key\": [\"foo\", \"bar\": \"baz\"]}";
+    let two_colons = "{\"foo\" : \"bar\" : \"baz\"}";
+
+    assert!(json::parse(missing_val_1).is_err());
+    assert!(json::parse(missing_val_2).is_err());
+    assert!(json::parse(missing_val_3).is_err());
+    assert!(json::parse(missing_bracket_1).is_err());
+    assert!(json::parse(missing_bracket_2).is_err());
+    assert!(json::parse(missing_bracket_3).is_err());
+    assert!(json::parse(missing_bracket_4).is_err());
+    assert!(json::parse(no_comma_1).is_err());
+    assert!(json::parse(no_comma_2).is_err());
+    assert!(json::parse(no_comma_3).is_err());
+    assert!(json::parse(colon_in_array).is_err());
+    assert!(json::parse(two_colons).is_err());
 }
