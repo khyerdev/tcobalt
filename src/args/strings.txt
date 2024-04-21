@@ -53,6 +53,8 @@ Actions:
 		- Runs 'tcb get' commands from a file, separated by lines
 		- Syntax is the same as command-line tcobalt, just without `tcb get` each line
 
+Remember, the cobalt rate limit is 25 every 60 seconds. Refrain from making a bulk request with more than 25 URL's.
+
 [version]
 tcobalt command line utility {}
 Copyright (c) 2024 Khyernet

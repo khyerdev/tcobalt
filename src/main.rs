@@ -76,12 +76,23 @@ async fn main() -> std::process::ExitCode {
                                                     filename
                                                 }
                                             };
+                                            println!(
+                                                "Downloading {} to {} ...", 
+                                                {
+                                                    if args.c_audio_only {
+                                                        "audio"
+                                                    } else {
+                                                        "video"
+                                                    }
+                                                },
+                                                &filename
+                                            );
                                             match res.bytes().await {
                                                 Ok(stream) => {
-                                                    let path = std::env::current_dir().unwrap().join(filename.clone());
+                                                    let path = std::env::current_dir().unwrap().join(&filename);
                                                     match std::fs::write(path, stream) {
                                                         Ok(_) => {
-                                                            eprintln!("File downloaded successfully! {filename}");
+                                                            println!("File downloaded successfully! {filename}");
                                                         },
                                                         Err(e) => {
                                                             eprintln!("Unable to write data to file: {}", e.to_string());
@@ -101,6 +112,10 @@ async fn main() -> std::process::ExitCode {
                                         }
                                     }
                                 },
+                                "rate-limit" => {
+                                    eprintln!("You are being rate limited by cobalt! Please try again later.");
+                                    return std::process::ExitCode::FAILURE;
+                                }
                                 _ => unimplemented!()
                             }
                         },
