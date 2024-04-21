@@ -178,9 +178,9 @@ impl Args {
                 },
                 "bulk" | "b" => {
                     if let Some(action) = self.raw.get(2) {
+                        self.method = Some(types::Method::Bulk);
                         match action.as_str() {
                             "get" | "g" => {
-                                self.same_filenames = true;
                                 let mut url_list: Vec<String> = Vec::new();
                                 let mut dummy_args = self.raw.clone();
                                 let mut has_url = false;
@@ -211,7 +211,7 @@ impl Args {
                                         }
                                         self.bulk_array = Some(arg_array);
                                         if flags.out_filename.is_some() {
-                                            self.method = Some(types::Method::Bulk);
+                                            self.same_filenames = true;
                                         }
                                     },
                                     Err(e) => return Err(types::ParseError::throw_bulkerr(&format!("Invalid flags | {}", e.print()))),
