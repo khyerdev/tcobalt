@@ -101,6 +101,7 @@ async fn main() -> std::process::ExitCode {
 
 async fn execute_get_media(args: Args, bulk: u16) -> bool {
     let json = cobalt_args(&args);
+    let download_url: &str = args.c_url.as_ref().unwrap();
 
     let request = reqwest::Client::new().post("https://co.wuk.sh/api/json")
         .header("User-Agent", &format!("tcobalt {}", VERSION.trim()))
@@ -115,7 +116,7 @@ async fn execute_get_media(args: Args, bulk: u16) -> bool {
                     match json.get("status".into()).unwrap().get_str().unwrap().as_str() {
                         "error" => {
                             let text = json.get("text").unwrap().get_str().unwrap();
-                            eprintln!("Cobalt returned error: {text}");
+                            eprintln!("Cobalt returned error: {text} (when downloading from {download_url})");
                             return false;
                         },
                         "stream" | "redirect" => {
@@ -157,7 +158,7 @@ async fn execute_get_media(args: Args, bulk: u16) -> bool {
                                     println!(
                                         "Downloading {} from {} ...", 
                                         media,
-                                        &args.c_url.unwrap()
+                                        download_url
                                     );
                                     match res.bytes().await {
                                         Ok(stream) => {
@@ -168,25 +169,25 @@ async fn execute_get_media(args: Args, bulk: u16) -> bool {
                                                     println!("Your {media} is ready! >> {filename}")
                                                 },
                                                 Err(e) => {
-                                                    eprintln!("Unable to write data to file: {}", e.to_string());
+                                                    eprintln!("Unable to write data to file: {} (when writing to {filename})", e.to_string());
                                                     return false;
                                                 }
                                             }
                                         },
                                         Err(e) => {
-                                            eprintln!("Error decoding byte stream: {}", e.to_string());
+                                            eprintln!("Error decoding byte stream: {} (when downloading from {download_url})", e.to_string());
                                             return false;
                                         }
                                     }
                                 },
                                 Err(e) => {
-                                    eprintln!("Live renderer did not respond: {}", e.to_string());
+                                    eprintln!("Live renderer did not respond: {} (when downloading from {download_url})", e.to_string());
                                     return false;
                                 }
                             }
                         },
                         "rate-limit" => {
-                            eprintln!("You are being rate limited by cobalt! Please try again later.");
+                            eprintln!("You are being rate limited by cobalt! Please try again later. (when downloading from {download_url})");
                             return false;
                         }
                         _ => unimplemented!()
@@ -199,7 +200,7 @@ async fn execute_get_media(args: Args, bulk: u16) -> bool {
             }
         },
         Err(e) => {
-            eprintln!("Cobalt server did not respond: {}", e.to_string());
+            eprintln!("Cobalt server did not respond: {} (when downloading from {download_url})", e.to_string());
         }
     }
     true
@@ -208,7 +209,6 @@ async fn execute_get_media(args: Args, bulk: u16) -> bool {
 fn print_cobalt_error(error: String) {
     eprintln!("Cobalt server returned improper JSON");
     eprintln!("JSON parse error: {error}");
-    eprintln!("Either Cobalt is down, or you somehow got blocked specifically in this application.\n");
 }
 
 const POST_TEMPLATE: &str = "{
