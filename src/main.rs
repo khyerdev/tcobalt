@@ -1,5 +1,9 @@
 mod json;
 mod args;
+use std::pin::Pin;
+use std::sync::Arc;
+use tokio::sync::RwLock;
+
 use args as tcargs;
 use args::Args;
 
@@ -33,13 +37,30 @@ async fn main() -> std::process::ExitCode {
     }
     match args.method.clone().expect("Failed to catch invalid method early") {
         args::types::Method::Get => {
-            let success = execute_get_media(args).await;
+            let success = execute_get_media(args, 0).await;
             if !success {
                 return std::process::ExitCode::FAILURE;
             }
         },
         args::types::Method::Bulk => {
-            println!("{:#?}", args);
+            let failed: Arc<RwLock<bool>> = Arc::new(RwLock::new(false));
+            let mut futures_array: Vec<Pin<Box<dyn std::future::Future<Output = ()>>>> = Vec::new();
+            let mut i = 0;
+            args.bulk_array.unwrap().iter().for_each(|a| {
+                i += 1;
+                let args = a.clone();
+                let switch = Arc::clone(&failed);
+                let task = async move {
+                    let success = execute_get_media(args, i).await;
+                    if !success {
+                        let mut lock = switch.write().await;
+                        *lock = true;
+                    }
+                };
+                futures_array.push(Box::pin(task));
+            });
+
+            futures::future::join_all(futures_array).await;
         },
         args::types::Method::List => println!("{}", tcargs::strings::get_mod("supported")),
         args::types::Method::Help => unreachable!(),
@@ -72,7 +93,7 @@ async fn main() -> std::process::ExitCode {
     std::process::ExitCode::SUCCESS
 }
 
-async fn execute_get_media(args: Args) -> bool {
+async fn execute_get_media(args: Args, bulk: u16) -> bool {
     let json = cobalt_args(&args);
 
     let request = reqwest::Client::new().post("https://co.wuk.sh/api/json")
@@ -99,7 +120,13 @@ async fn execute_get_media(args: Args) -> bool {
                             match stream_request.send().await {
                                 Ok(res) => {
                                     let filename = match args.out_filename {
-                                        Some(name) => name,
+                                        Some(name) => {
+                                            if bulk > 0 {
+                                                format!("{bulk}-{name}")
+                                            } else {
+                                                name
+                                            }
+                                        },
                                         None => {
                                             let disposition = res.headers().get("Content-Disposition").unwrap().to_str().unwrap();
                                             let mut pass: u8 = 0;
@@ -130,7 +157,7 @@ async fn execute_get_media(args: Args) -> bool {
                                         Ok(stream) => {
                                             println!("Data downloaded successfully! Writing {media} to {} ...", &filename);
                                             let path = std::env::current_dir().unwrap().join(&filename);
-                                            match std::fs::write(path, stream) {
+                                            match tokio::fs::write(path, stream).await {
                                                 Ok(_) => {
                                                     println!("Your {media} is ready! >> {filename}")
                                                 },
