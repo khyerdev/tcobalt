@@ -33,101 +33,9 @@ async fn main() -> std::process::ExitCode {
     }
     match args.method.clone().expect("Failed to catch invalid method early") {
         args::types::Method::Get => {
-            let json = cobalt_args(&args);
-
-            let request = reqwest::Client::new().post("https://co.wuk.sh/api/json")
-                .header("User-Agent", &format!("tcobalt {}", VERSION.trim()))
-                .header("Accept", "application/json")
-                .header("Content-Type", "application/json")
-                .body(json);
-
-            match request.send().await {
-                Ok(res) => {
-                    match json::parse(res.text().await.unwrap()) {
-                        Ok(json) => {
-                            match json.get("status".into()).unwrap().get_str().unwrap().as_str() {
-                                "error" => {
-                                    let text = json.get("text").unwrap().get_str().unwrap();
-                                    eprintln!("Cobalt returned error: {text}");
-                                    return std::process::ExitCode::FAILURE;
-                                },
-                                "stream" | "redirect" => {
-                                    let url = json.get("url").unwrap().get_str().unwrap();
-                                    let stream_request = reqwest::Client::new().get(url)
-                                        .header("User-Agent", &format!("tcobalt {}", VERSION.trim()));
-                                    
-                                    match stream_request.send().await {
-                                        Ok(res) => {
-                                            let filename = match args.out_filename {
-                                                Some(name) => name,
-                                                None => {
-                                                    let disposition = res.headers().get("Content-Disposition").unwrap().to_str().unwrap();
-                                                    let mut pass: u8 = 0;
-                                                    let mut filename = String::new();
-                                                    for c in disposition.chars() {
-                                                        if c == ';' || c == '\"' {
-                                                            pass += 1;
-                                                            continue;
-                                                        }
-                                                        if pass == 2 {
-                                                            filename.push(c);
-                                                        }
-                                                    }
-                                                    filename
-                                                }
-                                            };
-                                            println!(
-                                                "Downloading {} to {} ...", 
-                                                {
-                                                    if args.c_audio_only {
-                                                        "audio"
-                                                    } else {
-                                                        "video"
-                                                    }
-                                                },
-                                                &filename
-                                            );
-                                            match res.bytes().await {
-                                                Ok(stream) => {
-                                                    let path = std::env::current_dir().unwrap().join(&filename);
-                                                    match std::fs::write(path, stream) {
-                                                        Ok(_) => {
-                                                            println!("File downloaded successfully! {filename}");
-                                                        },
-                                                        Err(e) => {
-                                                            eprintln!("Unable to write data to file: {}", e.to_string());
-                                                            return std::process::ExitCode::FAILURE;
-                                                        }
-                                                    }
-                                                },
-                                                Err(e) => {
-                                                    eprintln!("Error decoding byte stream: {}", e.to_string());
-                                                    return std::process::ExitCode::FAILURE;
-                                                }
-                                            }
-                                        },
-                                        Err(e) => {
-                                            eprintln!("Live renderer did not respond: {}", e.to_string());
-                                            return std::process::ExitCode::FAILURE;
-                                        }
-                                    }
-                                },
-                                "rate-limit" => {
-                                    eprintln!("You are being rate limited by cobalt! Please try again later.");
-                                    return std::process::ExitCode::FAILURE;
-                                }
-                                _ => unimplemented!()
-                            }
-                        },
-                        Err(e) => {
-                            print_cobalt_error(e);
-                            return std::process::ExitCode::FAILURE;
-                        }
-                    }
-                },
-                Err(e) => {
-                    eprintln!("Cobalt server did not respond: {}", e.to_string());
-                }
+            let success = execute_get_media(args).await;
+            if !success {
+                return std::process::ExitCode::FAILURE;
             }
         },
         args::types::Method::Bulk => {
@@ -162,6 +70,106 @@ async fn main() -> std::process::ExitCode {
         },
     }
     std::process::ExitCode::SUCCESS
+}
+
+async fn execute_get_media(args: Args) -> bool {
+    let json = cobalt_args(&args);
+
+    let request = reqwest::Client::new().post("https://co.wuk.sh/api/json")
+        .header("User-Agent", &format!("tcobalt {}", VERSION.trim()))
+        .header("Accept", "application/json")
+        .header("Content-Type", "application/json")
+        .body(json);
+
+    match request.send().await {
+        Ok(res) => {
+            match json::parse(res.text().await.unwrap()) {
+                Ok(json) => {
+                    match json.get("status".into()).unwrap().get_str().unwrap().as_str() {
+                        "error" => {
+                            let text = json.get("text").unwrap().get_str().unwrap();
+                            eprintln!("Cobalt returned error: {text}");
+                            return false;
+                        },
+                        "stream" | "redirect" => {
+                            let url = json.get("url").unwrap().get_str().unwrap();
+                            let stream_request = reqwest::Client::new().get(url)
+                                .header("User-Agent", &format!("tcobalt {}", VERSION.trim()));
+
+                            match stream_request.send().await {
+                                Ok(res) => {
+                                    let filename = match args.out_filename {
+                                        Some(name) => name,
+                                        None => {
+                                            let disposition = res.headers().get("Content-Disposition").unwrap().to_str().unwrap();
+                                            let mut pass: u8 = 0;
+                                            let mut filename = String::new();
+                                            for c in disposition.chars() {
+                                                if c == ';' || c == '\"' {
+                                                    pass += 1;
+                                                    continue;
+                                                }
+                                                if pass == 2 {
+                                                    filename.push(c);
+                                                }
+                                            }
+                                            filename
+                                        }
+                                    };
+                                    println!(
+                                        "Downloading {} to {} ...", 
+                                        {
+                                            if args.c_audio_only {
+                                                "audio"
+                                            } else {
+                                                "video"
+                                            }
+                                        },
+                                        &filename
+                                    );
+                                    match res.bytes().await {
+                                        Ok(stream) => {
+                                            let path = std::env::current_dir().unwrap().join(&filename);
+                                            match std::fs::write(path, stream) {
+                                                Ok(_) => {
+                                                    println!("File downloaded successfully! {filename}");
+                                                },
+                                                Err(e) => {
+                                                    eprintln!("Unable to write data to file: {}", e.to_string());
+                                                    return false;
+                                                }
+                                            }
+                                        },
+                                        Err(e) => {
+                                            eprintln!("Error decoding byte stream: {}", e.to_string());
+                                            return false;
+                                        }
+                                    }
+                                },
+                                Err(e) => {
+                                    eprintln!("Live renderer did not respond: {}", e.to_string());
+                                    return false;
+                                }
+                            }
+                        },
+                        "rate-limit" => {
+                            eprintln!("You are being rate limited by cobalt! Please try again later.");
+                            return false;
+                        }
+                        _ => unimplemented!()
+                    }
+                },
+                Err(e) => {
+                    print_cobalt_error(e);
+                    return false;
+                }
+            }
+        },
+        Err(e) => {
+            eprintln!("Cobalt server did not respond: {}", e.to_string());
+        }
+    }
+    true
 }
 
 fn print_cobalt_error(error: String) {
