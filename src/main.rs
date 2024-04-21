@@ -116,23 +116,23 @@ async fn execute_get_media(args: Args) -> bool {
                                             filename
                                         }
                                     };
+                                    let media = if args.c_audio_only {
+                                        "audio"
+                                    } else {
+                                        "video"
+                                    };
                                     println!(
-                                        "Downloading {} to {} ...", 
-                                        {
-                                            if args.c_audio_only {
-                                                "audio"
-                                            } else {
-                                                "video"
-                                            }
-                                        },
-                                        &filename
+                                        "Downloading {} from {} ...", 
+                                        media,
+                                        &args.c_url.unwrap()
                                     );
                                     match res.bytes().await {
                                         Ok(stream) => {
+                                            println!("Data downloaded successfully! Writing {media} to {} ...", &filename);
                                             let path = std::env::current_dir().unwrap().join(&filename);
                                             match std::fs::write(path, stream) {
                                                 Ok(_) => {
-                                                    println!("File downloaded successfully! {filename}");
+                                                    println!("Your {media} is ready! >> {filename}")
                                                 },
                                                 Err(e) => {
                                                     eprintln!("Unable to write data to file: {}", e.to_string());
