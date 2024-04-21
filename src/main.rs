@@ -16,7 +16,8 @@ async fn main() -> std::process::ExitCode {
         return std::process::ExitCode::SUCCESS;
     }
 
-    let _placeholder = "https://www.youtube.com/watch?v=zn5sTDXSp8E";
+    let debug = std::env::var("TCOBALT_DEBUG").is_ok_and(|v| v == 1.to_string());
+    if debug { eprintln!("[DEBUG] Parsing arguments ..") };
     let args = match Args::get().parse() {
         Ok(parsed) => parsed,
         Err(err) => {
@@ -37,7 +38,9 @@ async fn main() -> std::process::ExitCode {
     }
     match args.method.clone().expect("Failed to catch invalid method early") {
         args::types::Method::Get => {
-            let success = execute_get_media(args, 0).await;
+            if debug { eprintln!("[DEBUG] Executing GET method") };
+            let success = execute_get_media(args, 0, debug).await;
+            if debug { eprintln!("[DEBUG] GET method is complete") };
             if !success {
                 return std::process::ExitCode::FAILURE;
             }
@@ -46,6 +49,7 @@ async fn main() -> std::process::ExitCode {
             let failed: Arc<RwLock<bool>> = Arc::new(RwLock::new(false));
             let mut futures_array: Vec<Pin<Box<dyn std::future::Future<Output = ()>>>> = Vec::new();
             let mut i = 0;
+            if debug { eprintln!("[DEBUG] Collecting bulk tasks ...") };
             args.bulk_array.unwrap().iter().for_each(|a| {
                 if args.same_filenames {
                     i += 1;
@@ -53,7 +57,7 @@ async fn main() -> std::process::ExitCode {
                 let args = a.clone();
                 let switch = Arc::clone(&failed);
                 let task = async move {
-                    let success = execute_get_media(args, i).await;
+                    let success = execute_get_media(args, i, debug).await;
                     if !success {
                         let mut lock = switch.write().await;
                         *lock = true;
@@ -62,7 +66,9 @@ async fn main() -> std::process::ExitCode {
                 futures_array.push(Box::pin(task));
             });
 
+            if debug { eprintln!("[DEBUG] Executing all tasks asynchronously ...") };
             futures::future::join_all(futures_array).await;
+            if debug { eprintln!("[DEBUG] Execution has completed") };
 
             if failed.read().await.clone() == true {
                 return std::process::ExitCode::FAILURE;
@@ -74,6 +80,7 @@ async fn main() -> std::process::ExitCode {
         args::types::Method::CobaltVersion => {
             let request = reqwest::Client::new().get("https://co.wuk.sh/api/serverInfo")
                 .header("User-Agent", &format!("tcobalt {}", VERSION.trim()));
+            if debug { eprintln!("[DEBUG] Sending GET request to cobalt ...") };
             let ver = match request.send().await {
                 Ok(res) => res.text().await.unwrap_or("{\"version\":\"unknown\",\"commit\":\"unknown\",\"branch\":\"unknown\"}".to_string()),
                 Err(e) => {
@@ -81,6 +88,7 @@ async fn main() -> std::process::ExitCode {
                     return std::process::ExitCode::FAILURE;
                 }
             };
+            if debug { eprintln!("[DEBUG] Response received, parsing json ...") };
             let stats = match json::parse(&ver) {
                 Ok(j) => j,
                 Err(e) => {
@@ -98,7 +106,7 @@ async fn main() -> std::process::ExitCode {
     std::process::ExitCode::SUCCESS
 }
 
-async fn execute_get_media(args: Args, bulk: u16) -> bool {
+async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
     let json = cobalt_args(&args);
     let download_url: &str = args.c_url.as_ref().unwrap();
 
@@ -108,24 +116,31 @@ async fn execute_get_media(args: Args, bulk: u16) -> bool {
         .header("Content-Type", "application/json")
         .body(json);
 
+    if debug { eprintln!("[DEBUG {download_url}] Sending POST request to cobalt server ...") };
     match request.send().await {
         Ok(res) => {
             let body = res.text().await.unwrap();
+            if debug { eprintln!("[DEBUG {download_url}] Response received, parsing json ...") };
             match json::parse(&body) {
                 Ok(json) => {
-                    match json.get("status".into()).unwrap().get_str().unwrap().as_str() {
+                    let status = json.get("status".into()).unwrap().get_str().unwrap();
+                    match status.as_str() {
                         "error" => {
                             let text = json.get("text").unwrap().get_str().unwrap();
                             eprintln!("Cobalt returned error: {text} (when downloading from {download_url})");
                             return false;
                         },
                         "stream" | "redirect" => {
+                            if debug && status == "redirect" { eprintln!("[DEBUG {download_url}] Cobalt returned a redirect url, sending GET request ...") };
+                            if debug && status == "stream" { eprintln!("[DEBUG {download_url}] Cobalt returned a stream, sending GET request ...") };
+
                             let url = json.get("url").unwrap().get_str().unwrap();
                             let stream_request = reqwest::Client::new().get(url)
                                 .header("User-Agent", &format!("tcobalt {}", VERSION.trim()));
 
                             match stream_request.send().await {
                                 Ok(res) => {
+                                    if debug { eprintln!("[DEBUG {download_url}] Response received from stream") };
                                     let filename = match args.out_filename {
                                         Some(name) => {
                                             if bulk > 0 {
@@ -135,6 +150,7 @@ async fn execute_get_media(args: Args, bulk: u16) -> bool {
                                             }
                                         },
                                         None => {
+                                            if debug { eprintln!("[DEBUG {download_url}] Obtaining filename from headers") };
                                             let disposition = res.headers().get("Content-Disposition").unwrap().to_str().unwrap();
                                             let mut pass: u8 = 0;
                                             let mut filename = String::new();
@@ -210,9 +226,9 @@ fn print_cobalt_error(error: String, body: String) {
     eprintln!("Cobalt server returned improper JSON");
     eprintln!("JSON parse error: {error}");
     if std::env::var("TCOBALT_DEBUG").is_ok_and(|v| v == 1.to_string()) == true {
-        eprintln!("\nCobalt returned response: {}\n\n", body);
-        eprintln!("If this response isn't proper JSON, please contact wukko about this error.");
-        eprintln!("If this looks like proper json, contact khyernet about his json parser not functioning right");
+        eprintln!("\n[DEBUG] Cobalt returned response: {}\n\n", body);
+        eprintln!("[DEBUG] If this response isn't proper JSON, please contact wukko about this error.");
+        eprintln!("[DEBUG] If this looks like proper json, contact khyernet about his json parser not functioning right");
     } else {
         eprintln!("Contact wukko about this error. Run with TCOBALT_DEBUG=1 to see the incorrect response.")
     }

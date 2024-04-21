@@ -14,6 +14,7 @@ Version methods:
 You can also type the first letter for a method
 Type "help <method>" for more information about a method and its options
 Type "help examples" for some examples
+Run with TCOBALT_DEBUG=1 to be verbose about the process
 
 [get]
 tcobalt "get" method syntax
