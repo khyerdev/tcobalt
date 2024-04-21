@@ -81,11 +81,10 @@ async fn main() -> std::process::ExitCode {
                     return std::process::ExitCode::FAILURE;
                 }
             };
-            let stats = match json::parse(ver/* .clone() */) {
+            let stats = match json::parse(&ver) {
                 Ok(j) => j,
                 Err(e) => {
-                    print_cobalt_error(e);
-                    // eprintln!("Cobalt returned response: {:?}", ver);
+                    print_cobalt_error(e, ver);
                     return std::process::ExitCode::FAILURE;
                 }
             };
@@ -111,7 +110,8 @@ async fn execute_get_media(args: Args, bulk: u16) -> bool {
 
     match request.send().await {
         Ok(res) => {
-            match json::parse(res.text().await.unwrap()) {
+            let body = res.text().await.unwrap();
+            match json::parse(&body) {
                 Ok(json) => {
                     match json.get("status".into()).unwrap().get_str().unwrap().as_str() {
                         "error" => {
@@ -194,7 +194,7 @@ async fn execute_get_media(args: Args, bulk: u16) -> bool {
                     }
                 },
                 Err(e) => {
-                    print_cobalt_error(e);
+                    print_cobalt_error(e, body);
                     return false;
                 }
             }
@@ -206,9 +206,16 @@ async fn execute_get_media(args: Args, bulk: u16) -> bool {
     true
 }
 
-fn print_cobalt_error(error: String) {
+fn print_cobalt_error(error: String, body: String) {
     eprintln!("Cobalt server returned improper JSON");
     eprintln!("JSON parse error: {error}");
+    if std::env::var("TCOBALT_DEBUG").is_ok_and(|v| v == 1.to_string()) == true {
+        eprintln!("\nCobalt returned response: {}\n\n", body);
+        eprintln!("If this response isn't proper JSON, please contact wukko about this error.");
+        eprintln!("If this looks like proper json, contact khyernet about his json parser not functioning right");
+    } else {
+        eprintln!("Contact wukko about this error. Run with TCOBALT_DEBUG=1 to see the incorrect response.")
+    }
 }
 
 const POST_TEMPLATE: &str = "{
