@@ -30,7 +30,8 @@ Options:
 	-a --audio-only            Tells cobalt to only download and output the audio of the link
 	-m --mute-audio            Tells cobalt to mute the audio from the downloaded content
 	-g --twitter-gif           Tells cobalt to download the given twitter content as a gif
-	-o --output <filename>     The output filename. Defaults to the current datetime in the current directory. Make sure to include the proper file extension.
+	-o --output <filename>     The output filename. Make sure to include the proper file extension.
+				   If no filename is specified, it uses the internal filename of the video, or the hash of the url if none is available.
 
 Add a + as an argument if you want text piped in through `command | tcb get` to be used as the url
 
