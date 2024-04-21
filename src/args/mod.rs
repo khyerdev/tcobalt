@@ -17,6 +17,7 @@ pub struct Args {
     pub c_audio_muted: bool,
     pub c_twitter_gif: bool,
     pub out_filename: Option<String>,
+    pub same_filenames: bool,
     pub help_flag: Option<types::Help>
 }
 impl Args {
@@ -32,6 +33,7 @@ impl Args {
             c_audio_muted: false,
             c_twitter_gif: false,
             out_filename: None,
+            same_filenames: false,
             help_flag: None,
             method: None,
             bulk_array: None,
@@ -179,6 +181,7 @@ impl Args {
                         self.method = Some(types::Method::Bulk);
                         match action.as_str() {
                             "get" | "g" => {
+                                self.same_filenames = true;
                                 let mut url_list: Vec<String> = Vec::new();
                                 let mut dummy_args = self.raw.clone();
                                 let mut has_url = false;

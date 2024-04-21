@@ -47,7 +47,9 @@ async fn main() -> std::process::ExitCode {
             let mut futures_array: Vec<Pin<Box<dyn std::future::Future<Output = ()>>>> = Vec::new();
             let mut i = 0;
             args.bulk_array.unwrap().iter().for_each(|a| {
-                i += 1;
+                if args.same_filenames {
+                    i += 1;
+                }
                 let args = a.clone();
                 let switch = Arc::clone(&failed);
                 let task = async move {
