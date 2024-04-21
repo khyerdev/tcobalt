@@ -1,5 +1,6 @@
 mod json;
 mod args;
+use std::hash::{Hash, Hasher};
 use std::pin::Pin;
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -151,19 +152,45 @@ async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
                                         },
                                         None => {
                                             if debug { eprintln!("[DEBUG {download_url}] Obtaining filename from headers") };
-                                            let disposition = res.headers().get("Content-Disposition").unwrap().to_str().unwrap();
-                                            let mut pass: u8 = 0;
-                                            let mut filename = String::new();
-                                            for c in disposition.chars() {
-                                                if c == ';' || c == '\"' {
-                                                    pass += 1;
-                                                    continue;
-                                                }
-                                                if pass == 2 {
-                                                    filename.push(c);
+                                            match res.headers().get("Content-Disposition") {
+                                                Some(disposition) => {
+                                                    let disposition = disposition.to_str().unwrap();
+                                                    let mut pass: u8 = 0;
+                                                    let mut filename = String::new();
+                                                    for c in disposition.chars() {
+                                                        if c == ';' || c == '\"' {
+                                                            pass += 1;
+                                                            continue;
+                                                        }
+                                                        if pass == 2 {
+                                                            filename.push(c);
+                                                        }
+                                                        if pass == 3 {
+                                                            break;
+                                                        }
+                                                    }
+                                                    filename
+                                                },
+                                                None => {
+                                                    if debug { eprintln!("[DEBUG {download_url}] No filename specified, generating random filename ...") };
+                                                    let mut hasher = std::hash::DefaultHasher::new();
+                                                    download_url.hash(&mut hasher);
+                                                    let mut hash = hasher.finish().to_string();
+                                                    if args.c_twitter_gif {
+                                                        hash.push_str(".gif");
+                                                    } else {
+                                                        match args.c_video_codec {
+                                                            tcargs::types::VideoCodec::AV1 | tcargs::types::VideoCodec::H264 => {
+                                                                hash.push_str(".mp4");
+                                                            }
+                                                            tcargs::types::VideoCodec::VP9 => {
+                                                                hash.push_str(".webm");
+                                                            }
+                                                        }
+                                                    }
+                                                    hash
                                                 }
                                             }
-                                            filename
                                         }
                                     };
                                     let media = if args.c_audio_only {
