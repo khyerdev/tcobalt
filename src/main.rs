@@ -63,6 +63,10 @@ async fn main() -> std::process::ExitCode {
             });
 
             futures::future::join_all(futures_array).await;
+
+            if failed.read().await.clone() == true {
+                return std::process::ExitCode::FAILURE;
+            }
         },
         args::types::Method::List => println!("{}", tcargs::strings::get_mod("supported")),
         args::types::Method::Help => unreachable!(),
