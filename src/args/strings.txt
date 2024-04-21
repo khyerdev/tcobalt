@@ -52,10 +52,10 @@ Actions:
 		- Output filename will be used for each file, with a number prepended to the name for each downloaded file
 		- Options apply for all links. Use `tcb execute` to use different options per link
 	execute <filename>
-		- Runs 'tcb get' commands from a file, separated by lines
+		- Runs `tcb get` commands from a file, separated by lines
 		- Syntax is the same as command-line tcobalt, just without `tcb get` each line
 
-Remember, the cobalt rate limit is 25 every 60 seconds. Refrain from making a bulk request with more than 25 URL's.
+Remember, the cobalt rate limit is 25 every 60 seconds. Refrain from making a bulk request with more than 25 URLs.
 
 [version]
 tcobalt command line utility {}
