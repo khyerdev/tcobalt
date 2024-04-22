@@ -42,14 +42,21 @@ Full usage help is available with `tcb help`
 
 tcobalt also supports `tcb --help`, `tcb -h`, `tcb --version`, and `tcb -v` for people who have not read the help or this page
 
-## Installation
-This section will be made later, compile this yourself.
+## Support
+As of now, tcobalt only officially supports the x86_64 architecture, but it can theoretically compile and run on others. If tcobalt compiles and runs well on your machine with a different architecture, open up an issue.
+
+tcobalt currently is not in any package repository.
+
 ### Support roadmap
 1. Arch Linux (and its derivatives)
-2. Debian (and its derivatives)
-3. Windows 10/11
-4. (if i can do this with flatpak) other distros
-5. MacOS
+2. i686 & pentium4 architectures
+3. Debian (and its derivatives)
+4. Windows 10/11
+5. (if i can do this with flatpak) other distros
+6. MacOS and aarch64 architecture
+
+## Installation
+This section will be made later, compile this yourself using cargo
 
 ## Dependencies
 tcobalt is designed to use as little dependencies as possible. Here are the ones it uses:
