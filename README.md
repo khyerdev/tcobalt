@@ -1,4 +1,4 @@
-# tcbobalt Command Line Utility
+# tcobalt Command Line Utility
 
 tcobalt (or tcb) is a command-line tool for downloading your favorite videos and audios from the internet. This tool uses the api of [wukko](https://github.com/wukko)'s [cobalt.tools](https://cobalt.tools), which is an amazing website to save what you love without ads, trackers, or anything creepy.
 <img src=https://github.com/OSCH2008/tcobalt/assets/82794982/f12acec9-c668-4b8b-819c-1256fe802915 style="width: 100%"></img>
