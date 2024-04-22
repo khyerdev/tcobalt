@@ -45,10 +45,10 @@ tcobalt also supports `tcb --help`, `tcb -h`, `tcb --version`, and `tcb -v` for 
 ## Support
 As of now, tcobalt only officially supports the x86_64 architecture, but it can theoretically compile and run on others. If tcobalt compiles and runs well on your machine with a different architecture, open up an issue.
 
-tcobalt currently is not in any package repository.
+tcobalt has only been packaged for Arch Linux and it's derivatives
 
 ### Support roadmap
-1. Arch Linux (and its derivatives)
+1. Arch Linux (and its derivatives) (DONE)
 2. i686, pentium4, and aarch64 architectures
 3. Debian (and its derivatives)
 4. Windows 10/11
@@ -56,7 +56,37 @@ tcobalt currently is not in any package repository.
 6. MacOS
 
 ## Installation
-This section will be made later, compile this yourself using cargo
+### Arch Linux
+1. Install `yay` or `paru`:
+   ```sh
+   sudo pacman -S base-devel
+   git clone https://aur.archlinux.org/yay.git # or paru.git
+   cd yay # or paru
+   makepkg -si
+   ```
+2. Use either `yay` or `paru` to install `tcobalt`:
+   ```
+   yay -S tcobalt
+   ```
+   ```
+   paru -S tcobalt
+   ```
+This process will also work on arch-based distros. On Manjaro, run `pamac install` instead of `pacman -S`
+
+### Other / unsupported
+More support will come later. If you are on an unsupported operating system, do this:
+1. Clone the repository
+   ```
+   git clone https://github.com/khyerdev/tcobalt.git
+   cd tcobalt
+   ```
+2. Compile with `cargo` (make sure rust is installed and the default rust toolchain is also installed)
+   ```
+   cargo build --release
+   ```
+3. Copy the `target/release/tcobalt` binary to a directory included in your `$PATH` (`%PATH%` on Windows)
+4. Create a symbolic link named `tcb` in the same directory you put `tcobalt` that points to that `tcobalt` binary
+   On windows, you would create a batch file in a `%PATH%` folder named `tcb.bat` that would just run the `tcobalt.exe` binary
 
 ## Dependencies
 tcobalt is designed to use as little dependencies as possible. Here are the ones it uses:
