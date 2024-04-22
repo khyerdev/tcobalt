@@ -49,11 +49,11 @@ tcobalt currently is not in any package repository.
 
 ### Support roadmap
 1. Arch Linux (and its derivatives)
-2. i686 & pentium4 architectures
+2. i686, pentium4, and aarch64 architectures
 3. Debian (and its derivatives)
 4. Windows 10/11
 5. (if i can do this with flatpak) other distros
-6. MacOS and aarch64 architecture
+6. MacOS
 
 ## Installation
 This section will be made later, compile this yourself using cargo
