@@ -47,15 +47,22 @@ As of now, tcobalt only officially supports the x86_64 architecture, but it can 
 
 tcobalt has only been packaged for Arch Linux and it's derivatives
 
-### Support roadmap
+### Distro Support roadmap
 1. Arch Linux (and its derivatives) (DONE)
-2. i686, pentium4, and aarch64 architectures
-3. Debian (and its derivatives)
-4. Windows 10/11
-5. (if i can do this with flatpak) other distros
-6. MacOS
+2. Debian (and its derivatives)
+3. Windows 10/11
+4. (if i can do this with flatpak) other distros
+5. MacOS
+
+### Architecture Support Progress
+As of now, the PKGBUILD for tcobalt on the AUR only has 'x86_64' in the arch array, but someone I know was able to install it on their aarch64 system right from the AUR
+1. x86_64 - YES
+2. aarch64 - Compiled
+3. i686 - Not Tested
+4. pentium4 - Not Tested
 
 ## Installation
+Make sure you have rust version 1.77.0 or higher before installing
 ### Arch Linux
 1. Install `yay` or `paru`:
    ```sh
