@@ -86,7 +86,7 @@ More support will come later. If you are on an unsupported operating system, do 
    ```
 3. Copy the `target/release/tcobalt` binary to a directory included in your `$PATH` (`%PATH%` on Windows)
 4. Create a symbolic link named `tcb` in the same directory you put `tcobalt` that points to that `tcobalt` binary
-   On windows, you would create a batch file in a `%PATH%` folder named `tcb.bat` that would just run the `tcobalt.exe` binary
+   On windows, you would create a batch file in a `%PATH%` folder named `tcb.bat` that would just run the `tcobalt.exe` binary, or just completely rename the binary to `tcb.exe`
 
 ## Dependencies
 tcobalt is designed to use as little dependencies as possible. Here are the ones it uses:
