@@ -22,9 +22,10 @@ Easy downloading for videos/songs with simple syntax
 Usage: tcb get <url> [options]
 
 Options:
+	-q --vquality <quality>    The quality of the output video. Options: 144, 480, 720, 1080, 1440, 2160, Default: 1080
 	-c --vcodec <codec>        The codec of the output video. Codecs: h264, av1, vp9, Default: h264
                                    h264 and av1 are for .mp4 files, vp9 is for .webm files.
-	-q --vquality <quality>    The quality of the output video. Options: 144, 480, 720, 1080, 1440, 2160, Default: 1080
+				   NOTE: This option is only for YouTube
 	-f --aformat <format>      The format of the audio. Formats: best, mp3, ogg, wav, opus, Default: mp3
                                    The "best" option takes the format of the original audio, and may not be specified on the website you took the media from.
 	-a --audio-only            Tells cobalt to only download and output the audio of the link
@@ -34,6 +35,7 @@ Options:
 				   If no filename is specified, it uses the internal filename of the video, or the hash of the url if none is available.
 
 Add a + as an argument if you want text piped in through `command | tcb get` to be used as the url
+DISCLAIMER: As of April 27th, 2024, youtube has been acting weird with their downloads, especially with the av1 and vp9 codecs.
 
 [list]
 tcobalt "list" method syntax
