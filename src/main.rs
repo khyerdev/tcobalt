@@ -173,7 +173,7 @@ async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
                                                 },
                                                 None => {
                                                     if debug { eprintln!("[DEBUG {download_url}] No filename specified, generating random filename ...") };
-                                                    let mut hasher = std::hash::DefaultHasher::new();
+                                                    let mut hasher = std::collections::hash_map::DefaultHasher::new();
                                                     download_url.hash(&mut hasher);
                                                     let mut hash = format!("{:x}", hasher.finish());
                                                     if args.c_twitter_gif {
