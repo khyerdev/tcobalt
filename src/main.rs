@@ -13,7 +13,7 @@ const VERSION: &str = include_str!("version");
 #[tokio::main]
 async fn main() -> std::process::ExitCode {
     if std::env::args().len() == 1 {
-        println!("tcobalt Command Line Utility; run `tc help` for help");
+        println!("tcobalt Command Line Utility; run `tcb help` for help");
         return std::process::ExitCode::SUCCESS;
     }
 
