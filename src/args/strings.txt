@@ -64,7 +64,7 @@ tcobalt command line utility {}
 Copyright (c) 2024 Khyernet
 This is free software, distributed under the GNU GPL v3.
 You may also use, modify, and distribute this software under the same license.
-The code and license is available at https://github.com/OSCH2008/tcobalt
+The code and license is available at https://github.com/khyerdev/tcobalt
 
 [supported]
 bilibili.com & bilibili.tv
