@@ -60,9 +60,10 @@ The live packaging status can be seen on the right.
 ### Architecture Support Progress
 As of now, the PKGBUILD for tcobalt on the AUR only has 'x86_64' in the arch array, but someone I know was able to install it on their aarch64 system right from the AUR
 1. x86_64 - YES
-2. aarch64 - Compiled
-3. i686 - Not Tested
-4. pentium4 - Not Tested
+2. arm - Not Tested
+3. aarch64 - Compiled
+4. i686 - Not Tested
+5. pentium4 - Not Tested
 
 ## Installation
 ### Arch Linux
