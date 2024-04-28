@@ -44,9 +44,9 @@ tcobalt also supports `tcb --help`, `tcb -h`, `tcb --version`, and `tcb -v` for 
 
 ## Support
 <a href="https://repology.org/project/tcobalt/versions"><img src="https://repology.org/badge/vertical-allrepos/tcobalt.svg" alt="Packaging status" align="right"></a>
-As of now, tcobalt only officially supports the x86_64 architecture, but it can theoretically compile and run on others. If tcobalt compiles and runs well on your machine with a different architecture, open up an issue.
+As of now, tcobalt only officially supports the x86_64 architecture, but it can theoretically compile and run on others. If tcobalt compiles and runs well on your machine with a different architecture, open up an issue
 
-The live packaging status can be seen on the right.
+The live packaging status can be seen on the right
 
 ### OS Support roadmap
 1. Arch Linux (and its derivatives) (DONE)
@@ -66,6 +66,12 @@ As of now, the PKGBUILD for tcobalt on the AUR only has 'x86_64' in the arch arr
 5. pentium4 - Not Tested
 
 ## Installation
+
+### Prebuilt Binary Downloads
+| Arch Linux (pkg) | Debian (pkg) | Linux | Windows | MacOS | BSD |
+| ---------------- | ------------ | ----- | ------- | ----- | --- |
+| [x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.1/tcobalt-1.0.1-1-x86_64.pkg.tar.zst) | [amd64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.1/tcobalt-1.0.1-amd64.deb) | [x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.1/tcobalt-linux-x86_64) | [x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.1/tcobalt-windows-x86_64.exe) | soon | not soon |
+
 ### Arch Linux
 1. Install `yay` or `paru`:
    ```sh
@@ -81,29 +87,47 @@ As of now, the PKGBUILD for tcobalt on the AUR only has 'x86_64' in the arch arr
    ```
    paru -S tcobalt
    ```
+OR
+
+Get it directly from the AUR without installing an AUR helper:
+```
+sudo pacman -S base-devel
+git clone https://aur.archlinux.org/tcobalt.git
+cd tcobalt
+makepkg -si
+```
+
+OR
+1. Download the pkg from the above prebuilt binaries
+2. Open a terminal and navigate to the directory containing the donwloaded .pkg.tar.zst file
+3. Run the following command (replacing the fields in the angle brackets as necessary)
+   ```
+   sudo pacman -U tcobalt-<version>-<rel>-<arch>.pkg.tar.zst
+   ```
 
 The PKGBUILD declares that this only supports x86_64, but since it builds from source, yay/paru will allow you to install tcobalt on any architecture
 
-This process will also work on arch-based distros. On Manjaro, run `pamac install` instead of `pacman -S`
+This process will also work on arch-based distros
 
-### Debian/Ubuntu amd64
+### Debian/Ubuntu
 I will soon upload this to a ppa to make this process a bit easier
-1. Download the amd64 .deb file from the latest release
-2. Open a terminal and navigate to the directory containing the .deb file
-3. Run the following command (replacing <version> with the current version)
+1. Download the pkg from the above prebuilt binaries
+2. Open a terminal and navigate to the directory containing the downloaded .deb file
+3. Run the following command (replacing the fields in the angle brackets as necessary)
    ```
-   sudo dpkg -i tcobalt-<version>-amd64.deb
+   sudo dpkg -i tcobalt-<version>-<arch>.deb
    ```
 
-## Windows 10/11 x86_64
-Download the .exe from the releases tab, put it into any `%PATH%` folder, and rename it to `tcb`.
+### Windows 10/11
+Download the .exe from the above prebuilt binaries, put it into any `%PATH%` folder, and rename it to `tcb`
 
 I will figure out how to add tcobalt to winget-pkgs sometime in the future
 
-### Other / unsupported
-You can try downloading the x86_64 linux binary from the releases tab, putting it into `/usr/bin`, and renaming it to `tcb`.
+### Other Linux
+You can try downloading the x86_64 linux binary from the above prebuilt binaries, putting it into `/usr/bin`, and renaming it to `tcb`
 
-More support will come later. If you are on an unsupported operating system, or the above didn't work, do this:
+### Unsupported OSes
+More support will come later. If you are on an unsupported operating system or architecture, or downloading a prebuilt binary didnt work, do this:
 1. Clone the repository
    ```
    git clone https://github.com/khyerdev/tcobalt.git
@@ -134,9 +158,9 @@ The [tokio](https://crates.io/crates/tokio) runtime, for easily handling asynchr
 
 [futures](https://crates.io/crates/futures), for easily parralelizing bulk downloads
 
-[reqwest](https://crates.io/crates/reqwest), for making web requests with HTTPS. Requires tokio to work.
+[reqwest](https://crates.io/crates/reqwest), for making web requests with HTTPS. Requires tokio to work
 
-I have reinvented the wheel for things that are possible for me to do without dependencies, like parsing json.
+I have reinvented the wheel for things that are possible for me to do without dependencies, like parsing json
 
 ## Other Projects
 tcobalt is not original, and a few other projects have the same concept implemented in other languages. Check them out, see if you prefer them over this one.
