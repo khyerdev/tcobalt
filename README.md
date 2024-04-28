@@ -49,8 +49,8 @@ tcobalt has only been packaged for Arch Linux and it's derivatives
 
 ### Distro Support roadmap
 1. Arch Linux (and its derivatives) (DONE)
-2. Debian (and its derivatives)
-3. Windows 10/11
+2. Debian (and its derivatives) (work in progress, they make it so hard to do so fjgksaertfgvsyuigfyas)
+3. Windows 10/11 (DONE)
 4. (if i can do this with flatpak) other distros
 5. MacOS
 
@@ -87,13 +87,23 @@ More support will come later. If you are on an unsupported operating system, do 
    git clone https://github.com/khyerdev/tcobalt.git
    cd tcobalt
    ```
-2. Compile with `cargo` (make sure rust is installed and the default rust toolchain is also installed)
-   ```
-   cargo build --release
-   ```
-3. Copy the `target/release/tcobalt` binary to a directory included in your `$PATH` (`%PATH%` on Windows)
-4. Create a symbolic link named `tcb` in the same directory you put `tcobalt` that points to that `tcobalt` binary
-   On windows, you would create a batch file in a `%PATH%` folder named `tcb.bat` that would just run the `tcobalt.exe` binary, or just completely rename the binary to `tcb.exe`
+2. Compile (make sure rust is installed and the default rust toolchain is also installed)
+   * On Linux:
+      ```
+      make
+      ```
+   * On Windows/MacOS:
+     ```
+     cargo build --release
+     ```
+3. Install tcobalt
+   * On Linux:
+     ```
+     sudo make install
+     ```
+   * On Windows/MacOS:
+     
+     Copy the tcobalt binary from `target/release` into a folder that has your PATH and rename it to `tcb` with the file extension corresponding to your OS (`.exe` on windows)
 
 ## Dependencies
 tcobalt is designed to use as little dependencies as possible. Here are the ones it uses:
