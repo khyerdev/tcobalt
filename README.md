@@ -48,12 +48,14 @@ As of now, tcobalt only officially supports the x86_64 architecture, but it can 
 
 The live packaging status can be seen on the right.
 
-### Distro Support roadmap
+### OS Support roadmap
 1. Arch Linux (and its derivatives) (DONE)
-2. Debian (and its derivatives) (work in progress, they make it so hard to do so fjgksaertfgvsyuigfyas)
-3. Windows 10/11 (DONE)
+2. Windows 10/11 (DONE)
+3. Debian (and its derivatives) (work in progress, they make it so hard to do so fjgksaertfgvsyuigfyas)
 4. (if i can do this with flatpak) other distros
-5. MacOS
+5. WinGet
+6. MacOS
+7. BSD
 
 ### Architecture Support Progress
 As of now, the PKGBUILD for tcobalt on the AUR only has 'x86_64' in the arch array, but someone I know was able to install it on their aarch64 system right from the AUR
@@ -63,7 +65,6 @@ As of now, the PKGBUILD for tcobalt on the AUR only has 'x86_64' in the arch arr
 4. pentium4 - Not Tested
 
 ## Installation
-Make sure you have rust version 1.77.0 or higher before installing
 ### Arch Linux
 1. Install `yay` or `paru`:
    ```sh
@@ -79,10 +80,29 @@ Make sure you have rust version 1.77.0 or higher before installing
    ```
    paru -S tcobalt
    ```
+
+The PKGBUILD declares that this only supports x86_64, but since it builds from source, yay/paru will allow you to install tcobalt on any architecture
+
 This process will also work on arch-based distros. On Manjaro, run `pamac install` instead of `pacman -S`
 
+### Debian/Ubuntu amd64
+I will soon upload this to a ppa to make this process a bit easier
+1. Download the amd64 .deb file from the latest release
+2. Open a terminal and navigate to the directory containing the .deb file
+3. Run the following command (replacing <version> with the current version)
+   ```
+   sudo apt deb tcobalt-<version>-amd64.deb
+   ```
+
+## Windows 10/11 x86_64
+Download the .exe from the releases tab, put it into any `%PATH%` folder, and rename it to `tcb`.
+
+I will figure out how to add tcobalt to winget-pkgs sometime in the future
+
 ### Other / unsupported
-More support will come later. If you are on an unsupported operating system, do this:
+You can try downloading the x86_64 linux binary from the releases tab, putting it into `/usr/bin`, and renaming it to `tcb`.
+
+More support will come later. If you are on an unsupported operating system, or the above didn't work, do this:
 1. Clone the repository
    ```
    git clone https://github.com/khyerdev/tcobalt.git
