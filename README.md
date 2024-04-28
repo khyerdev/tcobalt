@@ -137,7 +137,7 @@ The [tokio](https://crates.io/crates/tokio) runtime, for easily handling asynchr
 
 I have reinvented the wheel for things that are possible for me to do without dependencies, like parsing json.
 
-# Other Projects
+## Other Projects
 tcobalt is not original, and a few other projects have the same concept implemented in other languages. Check them out, see if you prefer them over this one.
 * [lostdusty/cobalt](https://github.com/lostdusty/cobalt): Cobalt CLI written in golang
 * [lostdusty/gobalt](https://github.com/lostdusty/gobalt): Golang library for the Cobalt API
