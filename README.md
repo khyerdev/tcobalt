@@ -91,7 +91,7 @@ I will soon upload this to a ppa to make this process a bit easier
 2. Open a terminal and navigate to the directory containing the .deb file
 3. Run the following command (replacing <version> with the current version)
    ```
-   sudo apt deb tcobalt-<version>-amd64.deb
+   sudo dpkg -i tcobalt-<version>-amd64.deb
    ```
 
 ## Windows 10/11 x86_64
