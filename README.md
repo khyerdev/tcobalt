@@ -43,9 +43,10 @@ Full usage help is available with `tcb help`
 tcobalt also supports `tcb --help`, `tcb -h`, `tcb --version`, and `tcb -v` for people who have not read the help or this page
 
 ## Support
+<a href="https://repology.org/project/tcobalt/versions"><img src="https://repology.org/badge/vertical-allrepos/tcobalt.svg" alt="Packaging status" align="right"></a>
 As of now, tcobalt only officially supports the x86_64 architecture, but it can theoretically compile and run on others. If tcobalt compiles and runs well on your machine with a different architecture, open up an issue.
 
-tcobalt has only been packaged for Arch Linux and it's derivatives
+The live packaging status can be seen on the right.
 
 ### Distro Support roadmap
 1. Arch Linux (and its derivatives) (DONE)
