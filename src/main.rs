@@ -272,8 +272,7 @@ const POST_TEMPLATE: &str = "{
     \"isAudioMuted\": <audio-muted>,
     \"dubLang\": false,
     \"disableMetadata\": false,
-    \"twitterGif\": <twitter-gif>,
-    \"vimeoDash\": false
+    \"twitterGif\": <twitter-gif>
 }";
 fn cobalt_args(args_in: &Args) -> String {
     POST_TEMPLATE.to_string()
