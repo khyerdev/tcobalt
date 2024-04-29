@@ -35,7 +35,6 @@ Options:
 				   If no filename is specified, it uses the internal filename of the video, or the hash of the url if none is available.
 
 Add a + as an argument if you want text piped in through `command | tcb get` to be used as the url
-DISCLAIMER: As of April 27th, 2024, youtube has been acting weird with their downloads, especially with the av1 and vp9 codecs.
 
 [list]
 tcobalt "list" method syntax
