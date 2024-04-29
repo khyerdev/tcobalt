@@ -39,9 +39,9 @@ async fn main() -> std::process::ExitCode {
     }
     match args.method.clone().expect("Failed to catch invalid method early") {
         args::types::Method::Get => {
-            if debug { eprintln!("[DEBUG] Executing GET method") };
+            if debug { eprintln!("[DEBUG] Executing GET method\n") };
             let success = execute_get_media(args, 0, debug).await;
-            if debug { eprintln!("[DEBUG] GET method is complete") };
+            if debug { eprintln!("\n[DEBUG] GET method is complete") };
             if !success {
                 return std::process::ExitCode::FAILURE;
             }
@@ -67,9 +67,9 @@ async fn main() -> std::process::ExitCode {
                 futures_array.push(Box::pin(task));
             });
 
-            if debug { eprintln!("[DEBUG] Executing all tasks asynchronously ...") };
+            if debug { eprintln!("[DEBUG] Executing all tasks asynchronously ...\n") };
             futures::future::join_all(futures_array).await;
-            if debug { eprintln!("[DEBUG] Execution has completed") };
+            if debug { eprintln!("\n[DEBUG] Execution has completed") };
 
             if failed.read().await.clone() == true {
                 return std::process::ExitCode::FAILURE;
@@ -93,7 +93,7 @@ async fn main() -> std::process::ExitCode {
             let stats = match json::parse(&ver) {
                 Ok(j) => j,
                 Err(e) => {
-                    print_cobalt_error(e, ver);
+                    eprintln!("{}", print_cobalt_error(e, ver));
                     return std::process::ExitCode::FAILURE;
                 }
             };
@@ -108,6 +108,28 @@ async fn main() -> std::process::ExitCode {
 }
 
 async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
+    macro_rules! attempt {
+        ($try: expr, $error_msg_format: literal $(,$($extra:expr),*)?) => {{
+            let result = $try;
+            if result.is_err() {
+                let e = result.unwrap_err().to_string();
+                eprintln!($error_msg_format, e $(,$($extra)*)?);
+                return false;
+            }
+            result.unwrap()
+        }};
+        ($try: expr, $error_string_generator: expr) => {{
+            let result = $try;
+            if result.is_err() {
+                let e = result.unwrap_err().to_string();
+                let diag = $error_string_generator;
+                eprintln!("{}", diag.to_string().replace("{}", &e));
+                return false;
+            }
+            result.unwrap()
+        }};
+    }
+
     let json = cobalt_args(&args);
     let download_url: &str = args.c_url.as_ref().unwrap();
 
@@ -118,146 +140,124 @@ async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
         .body(json);
 
     if debug { eprintln!("[DEBUG {download_url}] Sending POST request to cobalt server ...") };
-    match request.send().await {
-        Ok(res) => {
-            let body = res.text().await.unwrap();
-            if debug { eprintln!("[DEBUG {download_url}] Response received, parsing json ...") };
-            match json::parse(&body) {
-                Ok(json) => {
-                    let status = json.get("status".into()).unwrap().get_str().unwrap();
-                    match status.as_str() {
-                        "error" => {
-                            let text = json.get("text").unwrap().get_str().unwrap();
-                            eprintln!("Cobalt returned error: {text} (when downloading from {download_url})");
-                            return false;
-                        },
-                        "stream" | "redirect" => {
-                            if debug && status == "redirect" { eprintln!("[DEBUG {download_url}] Cobalt returned a redirect url, sending GET request ...") };
-                            if debug && status == "stream" { eprintln!("[DEBUG {download_url}] Cobalt returned a stream, sending GET request ...") };
+    let res = attempt!(request.send().await, "Cobalt server did not respond:\n\"{}\"\n(when downloading from {download_url})");
 
-                            let url = json.get("url").unwrap().get_str().unwrap();
-                            let stream_request = reqwest::Client::new().get(url)
-                                .header("User-Agent", &format!("tcobalt {}", VERSION.trim()));
+    let body = res.text().await.unwrap();
+    if debug { eprintln!("[DEBUG {download_url}] Response received, parsing json ...") };
+    let json = attempt!(json::parse(&body), print_cobalt_error("{}".into(), body));
 
-                            match stream_request.send().await {
-                                Ok(res) => {
-                                    if debug { eprintln!("[DEBUG {download_url}] Response received from stream") };
-                                    let filename = match args.out_filename {
-                                        Some(name) => {
-                                            if bulk > 0 {
-                                                format!("{bulk}-{name}")
-                                            } else {
-                                                name
-                                            }
-                                        },
-                                        None => {
-                                            if debug { eprintln!("[DEBUG {download_url}] Obtaining filename from headers") };
-                                            match res.headers().get("Content-Disposition") {
-                                                Some(disposition) => {
-                                                    let disposition = disposition.to_str().unwrap();
-                                                    let mut pass: u8 = 0;
-                                                    let mut filename = String::new();
-                                                    for c in disposition.chars() {
-                                                        if c == ';' || c == '\"' {
-                                                            pass += 1;
-                                                            continue;
-                                                        }
-                                                        if pass == 2 {
-                                                            filename.push(c);
-                                                        }
-                                                        if pass == 3 {
-                                                            break;
-                                                        }
-                                                    }
-                                                    filename
-                                                },
-                                                None => {
-                                                    if debug { eprintln!("[DEBUG {download_url}] No filename specified, generating random filename ...") };
-                                                    let mut hasher = std::collections::hash_map::DefaultHasher::new();
-                                                    download_url.hash(&mut hasher);
-                                                    let mut hash = format!("{:x}", hasher.finish());
-                                                    if args.c_twitter_gif {
-                                                        hash.push_str(".gif");
-                                                    } else {
-                                                        match args.c_video_codec {
-                                                            tcargs::types::VideoCodec::AV1 | tcargs::types::VideoCodec::H264 => {
-                                                                hash.push_str(".mp4");
-                                                            }
-                                                            tcargs::types::VideoCodec::VP9 => {
-                                                                hash.push_str(".webm");
-                                                            }
-                                                        }
-                                                    }
-                                                    hash
-                                                }
-                                            }
-                                        }
-                                    };
-                                    let media = if args.c_audio_only {
-                                        "audio"
-                                    } else {
-                                        "video"
-                                    };
-                                    println!(
-                                        "Downloading {} from {} ...", 
-                                        media,
-                                        download_url
-                                    );
-                                    match res.bytes().await {
-                                        Ok(stream) => {
-                                            println!("Data downloaded successfully! Writing {media} to {} ...", &filename);
-                                            let path = std::env::current_dir().unwrap().join(&filename);
-                                            match tokio::fs::write(path, stream).await {
-                                                Ok(_) => {
-                                                    println!("Your {media} is ready! >> {filename}")
-                                                },
-                                                Err(e) => {
-                                                    eprintln!("Unable to write data to file: {} (when writing to {filename})", e.to_string());
-                                                    return false;
-                                                }
-                                            }
-                                        },
-                                        Err(e) => {
-                                            eprintln!("Error decoding byte stream: {} (when downloading from {download_url})", e.to_string());
-                                            return false;
-                                        }
-                                    }
-                                },
-                                Err(e) => {
-                                    eprintln!("Live renderer did not respond: {} (when downloading from {download_url})", e.to_string());
-                                    return false;
-                                }
-                            }
-                        },
-                        "rate-limit" => {
-                            eprintln!("You are being rate limited by cobalt! Please try again later. (when downloading from {download_url})");
-                            return false;
-                        }
-                        _ => unimplemented!()
-                    }
-                },
-                Err(e) => {
-                    print_cobalt_error(e, body);
-                    return false;
-                }
-            }
+    let status = json.get("status".into()).unwrap().get_str().unwrap();
+    match status.as_str() {
+        "error" => {
+            let text = json.get("text").unwrap().get_str().unwrap();
+            eprintln!("Cobalt returned error:\n\"{text}\"\n(when downloading from {download_url})");
+            return false;
         },
-        Err(e) => {
-            eprintln!("Cobalt server did not respond: {} (when downloading from {download_url})", e.to_string());
+        "stream" | "redirect" => {
+            if debug && status == "redirect" { eprintln!("[DEBUG {download_url}] Cobalt returned a redirect url, sending GET request ...") };
+            if debug && status == "stream" { eprintln!("[DEBUG {download_url}] Cobalt returned a stream, sending GET request ...") };
+
+            let url = json.get("url").unwrap().get_str().unwrap();
+            let stream_request = reqwest::Client::new().get(url)
+                .header("User-Agent", &format!("tcobalt {}", VERSION.trim()));
+
+            let res = attempt!(stream_request.send().await, "Live renderer did not respond:\n\"{}\"\n(when downloading from {download_url})");
+
+            if debug { eprintln!("[DEBUG {download_url}] Response received from stream") };
+            let filename = extract_filename(&args, res.headers(), bulk, debug);
+            let media = if args.c_audio_only {
+                "audio"
+            } else {
+                "video"
+            };
+            println!(
+                "Downloading {} from {} ...", 
+                media,
+                download_url
+            );
+            let stream = attempt!(res.bytes().await, "Error decoding byte stream:\n\"{}\"\n(when downloading from {download_url})");
+
+            println!("Data downloaded successfully! Writing {media} to {} ...", &filename);
+            let path = std::env::current_dir().unwrap().join(&filename);
+            attempt!(tokio::fs::write(path, stream).await, "Unable to write data to file:\n\"{}\"\n(when writing to {filename})");
+
+            println!("Your {media} is ready! >> {filename}")
+        },
+        "rate-limit" => {
+            eprintln!("You are being rate limited by cobalt! Please try again later.\n(when downloading from {download_url})");
+            return false;
         }
+        _ => unimplemented!()
     }
     true
 }
 
-fn print_cobalt_error(error: String, body: String) {
-    eprintln!("Cobalt server returned improper JSON");
-    eprintln!("JSON parse error: {error}");
+fn print_cobalt_error(error: String, body: String) -> String {
+    let mut text = String::new();
+    text.push_str("Cobalt server returned improper JSON\n");
+    text.push_str(&format!("JSON parse error: {error}\n"));
     if std::env::var("TCOBALT_DEBUG").is_ok_and(|v| v == 1.to_string()) == true {
-        eprintln!("\n[DEBUG] Cobalt returned response: {}\n\n", body);
-        eprintln!("[DEBUG] If this response isn't proper JSON, please contact wukko about this error.");
-        eprintln!("[DEBUG] If this looks like proper json, contact khyernet about his json parser not functioning right");
+        text.push_str(&format!("\n[DEBUG] Cobalt returned response:\n{body}\n\n"));
+        text.push_str("[DEBUG] If this response isn't proper JSON, please contact wukko about this error.\n");
+        text.push_str("[DEBUG] If this looks like proper json, contact khyernet/khyerdev about his json parser not functioning right.");
     } else {
-        eprintln!("Contact wukko about this error. Run with TCOBALT_DEBUG=1 to see the incorrect response.")
+        text.push_str("Contact wukko about this error. Run with TCOBALT_DEBUG=1 to see the incorrect response.")
+    }
+    text
+}
+
+fn extract_filename(args: &Args, headers: &reqwest::header::HeaderMap, bulk: u16, debug: bool) -> String {
+    match &args.out_filename {
+        Some(name) => {
+            if bulk > 0 {
+                format!("{bulk}-{name}")
+            } else {
+                name.to_string()
+            }
+        },
+        None => {
+            let download_url = args.c_url.clone().unwrap();
+            if debug { eprintln!("[DEBUG {download_url}] Obtaining filename from headers") };
+            match headers.get("Content-Disposition") {
+                Some(disposition) => {
+                    let disposition = disposition.to_str().unwrap();
+                    let mut pass: u8 = 0;
+                    let mut filename = String::new();
+                    for c in disposition.chars() {
+                        if c == ';' || c == '\"' {
+                            pass += 1;
+                            continue;
+                        }
+                        if pass == 2 {
+                            filename.push(c);
+                        }
+                        if pass == 3 {
+                            break;
+                        }
+                    }
+                    filename
+                },
+                None => {
+                    if debug { eprintln!("[DEBUG {download_url}] No filename specified, generating random filename ...") };
+                    let mut hasher = std::collections::hash_map::DefaultHasher::new();
+                    download_url.hash(&mut hasher);
+                    let mut hash = format!("{:x}", hasher.finish());
+                    if args.c_twitter_gif {
+                        hash.push_str(".gif");
+                    } else {
+                        match args.c_video_codec {
+                            tcargs::types::VideoCodec::AV1 | tcargs::types::VideoCodec::H264 => {
+                                hash.push_str(".mp4");
+                            }
+                            tcargs::types::VideoCodec::VP9 => {
+                                hash.push_str(".webm");
+                            }
+                        }
+                    }
+                    hash
+                }
+            }
+        }
     }
 }
 
