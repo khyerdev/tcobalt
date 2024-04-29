@@ -1,3 +1,10 @@
+[![Packaging status](https://repology.org/badge/tiny-repos/tcobalt.svg)](https://repology.org/project/tcobalt/versions)
+[![GitHub Downloads](https://img.shields.io/github/downloads/khyerdev/tcobalt/total)](https://github.com/khyerdev/tcobalt/releases/)
+[![GitHub Release](https://img.shields.io/github/v/release/khyerdev/tcobalt)](https://github.com/khyerdev/tcobalt/releases/)
+[![GitHub License](https://img.shields.io/github/license/khyerdev/tcobalt)](https://github.com/khyerdev/tcobalt/blob/main/LICENSE)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/khyerdev/tcobalt/auto_tests.yml?label=tests)](https://github.com/khyerdev/tcobalt/actions)
+[![Evil Purged](https://img.shields.io/badge/evil-purged-red)]()
+
 # tcobalt Command Line Utility
 
 tcobalt (or tcb) is a command-line tool for downloading your favorite videos and audios from the internet. This tool uses the api of [wukko](https://github.com/wukko)'s [cobalt.tools](https://cobalt.tools), which is an amazing website to save what you love without ads, trackers, or anything creepy.
