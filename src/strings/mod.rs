@@ -1,8 +1,9 @@
-const RAW: &str = include_str!("strings.txt");
+const USAGE_TXT: &str = include_str!("usage.txt");
+const INFO_TXT: &str = include_str!("info.txt");
 
 pub fn get_help() -> String {
     let mut string = String::new();
-    for line in RAW.lines().into_iter() {
+    for line in USAGE_TXT.lines().into_iter() {
         if line.chars().collect::<Vec<char>>().first() == Some(&'[') { break }
         string.push_str(line);
         string.push('\n');
@@ -14,7 +15,7 @@ pub fn get_mod(help_mod: &str) -> String {
     let mut string = String::new();
     let mut select = false;
     let mut brackets = 0;
-    for line in RAW.lines().into_iter() {
+    for line in USAGE_TXT.lines().into_iter() {
         if brackets == 2 { break }
         if !select && remove_trailing_whitespace(line) != format!("[{help_mod}]") { continue }
         select = true;

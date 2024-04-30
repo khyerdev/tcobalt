@@ -1,5 +1,6 @@
 mod json;
 mod args;
+mod strings;
 use std::hash::{Hash, Hasher};
 use std::pin::Pin;
 use std::sync::Arc;
@@ -29,11 +30,11 @@ async fn main() -> std::process::ExitCode {
     };
     if let Some(help_flag) = args.help_flag {
         match help_flag {
-            args::types::Help::Help => println!("{}", tcargs::strings::get_help()),
-            args::types::Help::List => println!("{}", tcargs::strings::get_mod("list")),
-            args::types::Help::Bulk => println!("{}", tcargs::strings::get_mod("bulk")),
-            args::types::Help::Get => println!("{}", tcargs::strings::get_mod("get")),
-            args::types::Help::Examples => println!("{}", tcargs::strings::get_mod("examples")),
+            args::types::Help::Help => println!("{}", strings::get_help()),
+            args::types::Help::List => println!("{}", strings::get_mod("list")),
+            args::types::Help::Bulk => println!("{}", strings::get_mod("bulk")),
+            args::types::Help::Get => println!("{}", strings::get_mod("get")),
+            args::types::Help::Examples => println!("{}", strings::get_mod("examples")),
         }
         return std::process::ExitCode::SUCCESS;
     }
@@ -75,9 +76,9 @@ async fn main() -> std::process::ExitCode {
                 return std::process::ExitCode::FAILURE;
             }
         },
-        args::types::Method::List => println!("{}", tcargs::strings::get_mod("supported")),
+        args::types::Method::List => println!("{}", strings::get_mod("supported")),
         args::types::Method::Help => unreachable!(),
-        args::types::Method::Version => println!("{}", tcargs::strings::get_mod("version").replace("{}", VERSION.trim())),
+        args::types::Method::Version => println!("{}", strings::get_mod("version").replace("{}", VERSION.trim())),
         args::types::Method::CobaltVersion => {
             let request = reqwest::Client::new().get("https://co.wuk.sh/api/serverInfo")
                 .header("User-Agent", &format!("tcobalt {}", VERSION.trim()));
@@ -272,7 +273,8 @@ const POST_TEMPLATE: &str = "{
     \"isAudioMuted\": <audio-muted>,
     \"dubLang\": false,
     \"disableMetadata\": false,
-    \"twitterGif\": <twitter-gif>
+    \"twitterGif\": <twitter-gif>,
+    \"tiktokH265\": false
 }";
 fn cobalt_args(args_in: &Args) -> String {
     POST_TEMPLATE.to_string()
