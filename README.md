@@ -130,7 +130,7 @@ I will soon upload this to a ppa to make this process a bit easier
    ```
 
 ### Windows 10/11
-Download the .exe from the above prebuilt binaries, put it into any `%PATH%` folder, and rename it to `tcb`
+Download the .exe from the above prebuilt binaries, put it into any `%PATH%` folder, and rename it to `tcb.exe`
 
 I will figure out how to add tcobalt to winget-pkgs sometime in the future
 
