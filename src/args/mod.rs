@@ -1,7 +1,6 @@
 use std::io::Read;
 
 pub mod types;
-pub mod strings;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Args {

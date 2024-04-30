@@ -31,10 +31,10 @@ async fn main() -> std::process::ExitCode {
     if let Some(help_flag) = args.help_flag {
         match help_flag {
             args::types::Help::Help => println!("{}", strings::get_help()),
-            args::types::Help::List => println!("{}", strings::get_mod("list")),
-            args::types::Help::Bulk => println!("{}", strings::get_mod("bulk")),
-            args::types::Help::Get => println!("{}", strings::get_mod("get")),
-            args::types::Help::Examples => println!("{}", strings::get_mod("examples")),
+            args::types::Help::List => println!("{}", strings::get_str("usage", "list")),
+            args::types::Help::Bulk => println!("{}", strings::get_str("usage", "bulk")),
+            args::types::Help::Get => println!("{}", strings::get_str("usage", "get")),
+            args::types::Help::Examples => println!("{}", strings::get_str("usage", "examples")),
         }
         return std::process::ExitCode::SUCCESS;
     }
@@ -76,9 +76,9 @@ async fn main() -> std::process::ExitCode {
                 return std::process::ExitCode::FAILURE;
             }
         },
-        args::types::Method::List => println!("{}", strings::get_mod("supported")),
+        args::types::Method::List => println!("{}", strings::get_str("info", "supported")),
         args::types::Method::Help => unreachable!(),
-        args::types::Method::Version => println!("{}", strings::get_mod("version").replace("{}", VERSION.trim())),
+        args::types::Method::Version => println!("{}", strings::get_str("info", "version").replace("{}", VERSION.trim())),
         args::types::Method::CobaltVersion => {
             let request = reqwest::Client::new().get("https://co.wuk.sh/api/serverInfo")
                 .header("User-Agent", &format!("tcobalt {}", VERSION.trim()));

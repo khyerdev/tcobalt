@@ -1,0 +1,25 @@
+[version]
+tcobalt command line utility {}
+Copyright (c) 2024 Khyernet
+This is free software, distributed under the GNU GPL v3.
+You may also use, modify, and distribute this software under the same license.
+The code and license is available at https://github.com/khyerdev/tcobalt
+
+[supported]
+bilibili.com & bilibili.tv
+dailymotion videos
+instagram reels, posts & stories
+ok video (full video+audio only)
+pinterest videos & stories
+reddit videos & gifs
+rutube videos
+soundcloud (audio only)
+streamable.com
+tiktok videos, photos & audio
+tumblr video & audio
+twitch clips
+twitter videos & voice
+vimeo
+vine archive
+vk video & clips (full video+audio only)
+youtube videos, shorts & music

@@ -11,13 +11,19 @@ pub fn get_help() -> String {
     remove_trailing_whitespace(string)
 }
 
-pub fn get_mod(help_mod: &str) -> String {
+pub fn get_str(module: &str, symbol: &str) -> String {
+    let text = match module {
+        "usage" => USAGE_TXT,
+        "info" => INFO_TXT,
+        _ => unreachable!()
+    };
+
     let mut string = String::new();
     let mut select = false;
     let mut brackets = 0;
-    for line in USAGE_TXT.lines().into_iter() {
+    for line in text.lines().into_iter() {
         if brackets == 2 { break }
-        if !select && remove_trailing_whitespace(line) != format!("[{help_mod}]") { continue }
+        if !select && remove_trailing_whitespace(line) != format!("[{symbol}]") { continue }
         select = true;
         if line.chars().collect::<Vec<char>>().first() == Some(&'[') { brackets += 1; continue }
 
