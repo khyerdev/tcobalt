@@ -50,38 +50,24 @@ Full usage help is available with `tcb help`, but can also be seen in the [strin
 tcobalt also supports `tcb --help`, `tcb -h`, `tcb --version`, and `tcb -v` for people who have not read the help or this page
 
 ## Support
-<a href="https://repology.org/project/tcobalt/versions"><img src="https://repology.org/badge/vertical-allrepos/tcobalt.svg" alt="Packaging status" align="right"></a>
-As of now, tcobalt only officially supports the x86_64 architecture, but it can theoretically compile and run on others. If tcobalt compiles and runs well on your machine with a different architecture, open up an issue
+x86_64 is the only architecture I can personally compile tcobalt for. The only platform I have successfully cross-compiled tcobalt for is Windows on x86_64 from Linux on x86_64. Setting up a VM for a different architecture is possible, but it is far too much work and documentation than I can handle. I gave up trying, I clearly am not old enough to understand this.
 
-The live packaging status can be seen on the right
+If your desired platform isn't in this table, compile tcobalt yourself. If you wish there were downloads for your architecture, and you are able to compile tcobalt, send me the binary/package and open up an issue. The file given to me will be used for the most recent release, and ONLY the most recent release. If you wish your binary was kept up-to-date with each release, repeat this process for each release.
 
-### OS Support roadmap
-1. Arch Linux (and its derivatives) (DONE)
-2. Windows 10/11 (DONE)
-3. Debian (and its derivatives) (work in progress, they make it so hard to do so fjgksaertfgvsyuigfyas)
-4. (if i can do this with flatpak) other distros
-5. WinGet
-6. MacOS
-7. BSD
+### OS/Packager Support Progress <a href="https://repology.org/project/tcobalt/versions"><img src="https://repology.org/badge/vertical-allrepos/tcobalt.svg" alt="Packaging status" align="right"></a>
+1. Arch Linux (AUR) (COMPLETE)
+2. Windows 10/11 (Prebuilt binary)
+3. Fedora
+4. Ubuntu (Prebuilt PKG)
 
-### Architecture Support Progress
-As of now, the PKGBUILD for tcobalt on the AUR only has 'x86_64' in the arch array, but someone I know was able to install it on their aarch64 system right from the AUR
-1. x86_64 - YES
-2. arm - Not Tested
-3. aarch64 - Compiled
-4. i686 - Not Tested
+The repos that contain tcobalt can be seen on the right, along with the highest version the repo has.
 
 ## Installation
 
 ### Prebuilt Binary Downloads
-| Arch Linux (pkg) | Ubuntu (pkg) | Linux | Windows | MacOS |
-| ---------------- | ------------ | ----- | ------- | ----- |
-| [v1.0.2-1 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-1.0.2-1-x86_64.pkg.tar.zst) | [v1.0.2 amd64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-1.0.2-amd64.deb) | [v1.0.2 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-linux-x86_64) | [v1.0.2 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-windows-x86_64.exe) | TBD x86_64 |
-| TBD i686 | TBD i686 | TBD i686 | TBD i686 | not applicable |
-| TBD aarch64 | TBD arm64 | TBD aarch64 | TBD armv8 | TBD aarch64 |
-| TBD armv7 | TBD armhf | TBD armv7 | TBD armv7 | not applicable |
-
-My apologies if any of the ARM processor architectures above are incorrect, my field of experience is literally only x86_64 on linux (and some windows)
+| Arch Linux (pkg) | Ubuntu (pkg) | Linux | Windows |
+| ---------------- | ------------ | ----- | ------- |
+| [v1.0.2-1 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-1.0.2-1-x86_64.pkg.tar.zst) | [v1.0.2 amd64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-1.0.2-amd64.deb) | [v1.0.2 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-linux-x86_64) | [v1.0.2 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-windows-x86_64.exe) |
 
 ### Arch Linux
 1. Install `yay` or `paru`:
@@ -109,7 +95,7 @@ makepkg -si
 ```
 
 OR
-1. Download the pkg from the above prebuilt binaries
+1. Download the pkg from the above prebuilt binaries (or use cURL)
 2. Open a terminal and navigate to the directory containing the donwloaded .pkg.tar.zst file
 3. Run the following command (replacing the fields in the angle brackets as necessary)
    ```
