@@ -178,11 +178,18 @@ async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
             );
             let stream = attempt!(res.bytes().await, "Error decoding byte stream:\n\"{}\"\n(when downloading from {download_url})");
 
-            println!("Data downloaded successfully! Writing {media} to {} ...", &filename);
-            let path = std::env::current_dir().unwrap().join(&filename);
-            attempt!(tokio::fs::write(path, stream).await, "Unable to write data to file:\n\"{}\"\n(when writing to {filename})");
+            let display = match filename.contains(' ') {
+                true => {
+                    format!("'{}'", &filename)
+                },
+                false => filename.clone(),
+            };
 
-            println!("Your {media} is ready! >> {filename}")
+            println!("Data downloaded successfully! Writing {media} to {} ...", &display);
+            let path = std::env::current_dir().unwrap().join(&filename);
+            attempt!(tokio::fs::write(path, stream).await, "Unable to write data to file:\n\"{}\"\n(when writing to {display})");
+
+            println!("Your {media} is ready! >> {display}")
         },
         "rate-limit" => {
             eprintln!("You are being rate limited by cobalt! Please try again later.\n(when downloading from {download_url})");
