@@ -270,11 +270,11 @@ const POST_TEMPLATE: &str = "{
     \"filenamePattern\": \"classic\",
     \"isAudioOnly\": <audio-only>,
     \"isTTFullAudio\": false,
+    \"tiktokH265\": false,
     \"isAudioMuted\": <audio-muted>,
     \"dubLang\": false,
     \"disableMetadata\": false,
-    \"twitterGif\": <twitter-gif>,
-    \"tiktokH265\": false
+    \"twitterGif\": <twitter-gif>
 }";
 fn cobalt_args(args_in: &Args) -> String {
     POST_TEMPLATE.to_string()
