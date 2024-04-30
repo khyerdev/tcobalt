@@ -74,12 +74,12 @@ As of now, the PKGBUILD for tcobalt on the AUR only has 'x86_64' in the arch arr
 ## Installation
 
 ### Prebuilt Binary Downloads
-| Arch Linux (pkg) | Debian (pkg) | Linux | Windows | MacOS | BSD |
-| ---------------- | ------------ | ----- | ------- | ----- | --- |
-| [v1.0.2-1 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-1.0.2-1-x86_64.pkg.tar.zst) | [v1.0.1 amd64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.1/tcobalt-1.0.1-amd64.deb) | [v1.0.2 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-linux-x86_64) | [v1.0.2 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-windows-x86_64.exe) | TBD x86_64 | TBD x86_64 |
-| TBD i686 | TBD i686 | TBD i686 | TBD i686 | not applicable | TBD i686 |
-| TBD aarch64 | TBD arm64 | TBD aarch64 | TBD armv8 | TBD aarch64 | TBD aarch64 |
-| TBD armv7 | TBD armhf | TBD armv7 | TBD armv7 | not applicable | TBD armv7 |
+| Arch Linux (pkg) | Debian (pkg) | Linux | Windows | MacOS |
+| ---------------- | ------------ | ----- | ------- | ----- |
+| [v1.0.2-1 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-1.0.2-1-x86_64.pkg.tar.zst) | [v1.0.1 amd64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.1/tcobalt-1.0.1-amd64.deb) | [v1.0.2 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-linux-x86_64) | [v1.0.2 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-windows-x86_64.exe) | TBD x86_64 |
+| TBD i686 | TBD i686 | TBD i686 | TBD i686 | not applicable |
+| TBD aarch64 | TBD arm64 | TBD aarch64 | TBD armv8 | TBD aarch64 |
+| TBD armv7 | TBD armhf | TBD armv7 | TBD armv7 | not applicable |
 
 My apologies if any of the ARM processor architectures above are incorrect, my field of experience is literally only x86_64 on linux (and some windows)
 
