@@ -50,9 +50,7 @@ Full usage help is available with `tcb help`, but can also be seen in the [strin
 tcobalt also supports `tcb --help`, `tcb -h`, `tcb --version`, and `tcb -v` for people who have not read the help or this page
 
 ## Support
-x86_64 is the only architecture I can personally compile tcobalt for. The only platform I have successfully cross-compiled tcobalt for is Windows on x86_64 from Linux on x86_64. Setting up a VM for a different architecture is possible, but it is far too much work and documentation than I can handle. I gave up trying, I clearly am not old enough to understand this.
-
-If your desired platform isn't in this table, compile tcobalt yourself. If you wish there were downloads for your architecture, and you are able to compile tcobalt, send me the binary/package and open up an issue. The file given to me will be used for the most recent release, and ONLY the most recent release. If you wish your binary was kept up-to-date with each release, repeat this process for each release.
+x86_64 is the only architecture officially supported. It is hard for me to cross-compilr to other architectures or run other architectures. If you are on a different arch, you can compile tcobalt yourself. You can contribute prebuilt binaries too if you feel like it.
 
 ### OS/Packager Support Progress <a href="https://repology.org/project/tcobalt/versions"><img src="https://repology.org/badge/vertical-allrepos/tcobalt.svg" alt="Packaging status" align="right"></a>
 1. Arch Linux (AUR) (COMPLETE)
