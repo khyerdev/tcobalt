@@ -267,7 +267,7 @@ const POST_TEMPLATE: &str = "{
     \"vCodec\": \"<vcodec>\",
     \"vQuality\": \"<vquality>\",
     \"aFormat\": \"<aformat>\",
-    \"filenamePattern\": \"classic\",
+    \"filenamePattern\": \"<fname-style>\",
     \"isAudioOnly\": <audio-only>,
     \"isTTFullAudio\": false,
     \"tiktokH265\": false,
@@ -282,6 +282,7 @@ fn cobalt_args(args_in: &Args) -> String {
         .replace("<vcodec>", &args_in.c_video_codec.print())
         .replace("<vquality>", &args_in.c_video_quality.to_string())
         .replace("<aformat>", &args_in.c_audio_format.print())
+        .replace("<fname-style>", &args_in.c_fname_style.print())
         .replace("<audio-only>", &args_in.c_audio_only.to_string())
         .replace("<audio-muted>", &args_in.c_audio_muted.to_string())
         .replace("<twitter-gif>", &args_in.c_twitter_gif.to_string())

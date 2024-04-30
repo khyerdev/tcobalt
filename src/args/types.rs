@@ -29,6 +29,21 @@ impl AudioFormat {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone)]
+pub enum FilenamePattern {
+    Classic, Pretty, Basic, Nerdy
+}
+impl Default for FilenamePattern {
+    fn default() -> Self {
+        Self::Classic
+    }
+}
+impl FilenamePattern {
+    pub fn print(&self) -> String {
+        format!("{self:?}").to_lowercase()
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Help {
     Get, List, Bulk, Help, Examples
 }

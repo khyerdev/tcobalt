@@ -31,6 +31,9 @@ Options:
 	-a --audio-only            Tells cobalt to only download and output the audio of the link
 	-m --mute-audio            Tells cobalt to mute the audio from the downloaded content
 	-g --twitter-gif           Tells cobalt to download the given twitter content as a gif
+	-s --fname_style <style>   Tells cobalt which filename style to return. Styles: classic, pretty, basic, nerdy, Default: classic
+				   This option will not matter if -o or --output is specified.
+				   [TODO: show examples of styles, give output an option to still use the internal name]
 	-o --output <filename>     The output filename. Make sure to include the proper file extension.
 				   If no filename is specified, it uses the internal filename of the video, or the hash of the url if none is available.
 

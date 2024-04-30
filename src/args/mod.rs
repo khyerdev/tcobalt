@@ -16,6 +16,7 @@ pub struct Args {
     pub c_audio_muted: bool,
     pub c_twitter_gif: bool,
     pub out_filename: Option<String>,
+    pub c_fname_style: types::FilenamePattern,
     pub same_filenames: bool,
     pub help_flag: Option<types::Help>
 }
@@ -36,6 +37,7 @@ impl Args {
             help_flag: None,
             method: None,
             bulk_array: None,
+            c_fname_style: types::FilenamePattern::Classic
         }
     }
 
@@ -81,6 +83,7 @@ impl Args {
                                 "--mute-audio" => self.c_audio_muted = true,
                                 "--twitter-gif" => self.c_twitter_gif = true,
                                 "--output" => expected.push(ExpectedFlags::Output),
+                                "--fname-style" => expected.push(ExpectedFlags::FilenamePattern),
                                 _ => {
                                     if self.c_url == None && arg.contains("https://") {
                                         self.c_url = Some(arg.clone());
@@ -108,6 +111,7 @@ impl Args {
                                             'm' => self.c_audio_muted = true,
                                             'g' => self.c_twitter_gif = true,
                                             'o' => expected.push(ExpectedFlags::Output),
+                                            's' => expected.push(ExpectedFlags::FilenamePattern),
                                             _ => return Err(types::ParseError::throw_invalid(&format!("Invalid character {c} in multi-flag argument: {arg}")))
                                         }
                                     }
@@ -144,6 +148,15 @@ impl Args {
                                         self.out_filename = Some(arg.clone())
                                     } else {
                                         return Err(types::ParseError::throw_invalid("Output filename must be a video file type (supported: mp4/webm/gif), or an audio file type (supported: mp3/ogg/wav/opus)\nMake sure you choose the right file type for the chosen codec/format!"));
+                                    }
+                                },
+                                ExpectedFlags::FilenamePattern => {
+                                    match arg.as_str() {
+                                        "classic" | "c" => self.c_fname_style = types::FilenamePattern::Classic,
+                                        "pretty" | "p" => self.c_fname_style = types::FilenamePattern::Pretty,
+                                        "basic" | "b" => self.c_fname_style = types::FilenamePattern::Basic,
+                                        "nerdy" | "n" => self.c_fname_style = types::FilenamePattern::Nerdy,
+                                        _ => return Err(types::ParseError::throw_invalid(&format!("Invalid filename style: {arg}")))
                                     }
                                 }
                             }
@@ -264,5 +277,5 @@ impl Args {
 
 #[derive(Debug)]
 enum ExpectedFlags {
-    VideoCodec, VideoQuality, AudioFormat, Output,
+    VideoCodec, VideoQuality, AudioFormat, Output, FilenamePattern
 }
