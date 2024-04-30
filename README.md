@@ -45,7 +45,7 @@ Downloading three coding videos at once with 720p resolution each
 ```
 tcb bulk get -q 720 'https://www.youtube.com/watch?v=qclZUQYZTzg' 'https://www.youtube.com/watch?v=wvQCIMjlxHw' 'https://www.youtube.com/watch?v=3T3ZDquDDVg'
 ```
-Full usage help is available with `tcb help`, but can also be seen in the [strings.txt](https://github.com/khyerdev/tcobalt/blob/main/src/args/strings.txt) file
+Full usage help is available with `tcb help`, but can also be seen in the [usage.txt](https://github.com/khyerdev/tcobalt/blob/main/src/strings/usage.txt) and [info.txt](https://github.com/khyerdev/tcobalt/blob/main/src/strings/info.txt) files
 
 tcobalt also supports `tcb --help`, `tcb -h`, `tcb --version`, and `tcb -v` for people who have not read the help or this page
 
