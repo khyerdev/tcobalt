@@ -74,9 +74,9 @@ As of now, the PKGBUILD for tcobalt on the AUR only has 'x86_64' in the arch arr
 ## Installation
 
 ### Prebuilt Binary Downloads
-| Arch Linux (pkg) | Debian (pkg) | Linux | Windows | MacOS |
+| Arch Linux (pkg) | Ubuntu (pkg) | Linux | Windows | MacOS |
 | ---------------- | ------------ | ----- | ------- | ----- |
-| [v1.0.2-1 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-1.0.2-1-x86_64.pkg.tar.zst) | [v1.0.1 amd64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.1/tcobalt-1.0.1-amd64.deb) | [v1.0.2 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-linux-x86_64) | [v1.0.2 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-windows-x86_64.exe) | TBD x86_64 |
+| [v1.0.2-1 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-1.0.2-1-x86_64.pkg.tar.zst) | [v1.0.2 amd64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-1.0.2-amd64.deb) | [v1.0.2 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-linux-x86_64) | [v1.0.2 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-windows-x86_64.exe) | TBD x86_64 |
 | TBD i686 | TBD i686 | TBD i686 | TBD i686 | not applicable |
 | TBD aarch64 | TBD arm64 | TBD aarch64 | TBD armv8 | TBD aarch64 |
 | TBD armv7 | TBD armhf | TBD armv7 | TBD armv7 | not applicable |
@@ -120,9 +120,9 @@ The PKGBUILD declares that this only supports x86_64, but since it builds from s
 
 This process will also work on arch-based distros
 
-### Debian/Ubuntu
-I will soon upload this to a ppa to make this process a bit easier
-1. Download the pkg from the above prebuilt binaries
+### Ubuntu
+Packaging to a PPA has literally no good documentation online, and the official Ubuntu website for it has LITERALLY NO TEXT ON IT (its undergoing maintenance). Debian docs and launchpad docks also suck. You are stuck with this process until I feel like requesting tcobalt to be added to the official Ubuntu repositories. I won't bother with debian because they release stable updates every 2 years.
+1. Download the pkg from the above prebuilt binaries (or use cURL)
 2. Open a terminal and navigate to the directory containing the downloaded .deb file
 3. Run the following command (replacing the fields in the angle brackets as necessary)
    ```
@@ -135,7 +135,7 @@ Download the .exe from the above prebuilt binaries, put it into any `%PATH%` fol
 I will figure out how to add tcobalt to winget-pkgs sometime in the future
 
 ### Other Linux
-You can try downloading the x86_64 linux binary from the above prebuilt binaries, putting it into `/usr/bin`, and renaming it to `tcb`
+You can try downloading the linux binary from the above prebuilt binaries, putting it into `/usr/bin`, and renaming it to `tcb`
 
 ### Unsupported OSes
 More support will come later. If you are on an unsupported operating system or architecture, or downloading a prebuilt binary didnt work, do this:
