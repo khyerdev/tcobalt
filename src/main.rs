@@ -311,11 +311,11 @@ const POST_TEMPLATE: &str = "{
     \"aFormat\": \"<aformat>\",
     \"filenamePattern\": \"<fname-style>\",
     \"isAudioOnly\": <audio-only>,
-    \"isTTFullAudio\": false,
-    \"tiktokH265\": false,
+    \"isTTFullAudio\": <tt-full-audio>,
+    \"tiktokH265\": <tt-h265>,
     \"isAudioMuted\": <audio-muted>,
-    \"dubLang\": false,
-    \"disableMetadata\": false,
+    \"dubLang\": <dublang>,
+    \"disableMetadata\": <no-metadata>,
     \"twitterGif\": <twitter-gif>
 }";
 fn cobalt_args(args_in: &Args) -> String {
@@ -325,8 +325,12 @@ fn cobalt_args(args_in: &Args) -> String {
         .replace("<vquality>", &args_in.c_video_quality.to_string())
         .replace("<aformat>", &args_in.c_audio_format.print())
         .replace("<fname-style>", &args_in.c_fname_style.print())
+        .replace("<tt-full-audio>", &args_in.c_tt_full_audio.to_string())
+        .replace("<tt-h265>", &args_in.c_tt_h265.to_string())
         .replace("<audio-only>", &args_in.c_audio_only.to_string())
         .replace("<audio-muted>", &args_in.c_audio_muted.to_string())
+        .replace("<dublang>", &args_in.c_dublang.to_string())
+        .replace("<no-metadata>", &args_in.c_disable_metadata.to_string())
         .replace("<twitter-gif>", &args_in.c_twitter_gif.to_string())
 }
 
