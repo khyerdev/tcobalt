@@ -139,6 +139,7 @@ async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
         .header("User-Agent", &format!("tcobalt {}", VERSION.trim()))
         .header("Accept", "application/json")
         .header("Content-Type", "application/json")
+        .header("Accept-Language", &args.accept_language)
         .body(json);
 
     if debug { eprintln!("[DEBUG {download_url}] Sending POST request to cobalt server ...") };

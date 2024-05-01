@@ -19,6 +19,7 @@ pub struct Args {
     pub c_tt_h265: bool,
     pub c_dublang: bool,
     pub c_disable_metadata: bool,
+    pub accept_language: String,
     pub out_filename: Option<String>,
     pub c_fname_style: types::FilenamePattern,
     pub same_filenames: bool,
@@ -48,6 +49,7 @@ impl Args {
             c_tt_h265: false,
             c_dublang: false,
             c_disable_metadata: false,
+            accept_language: String::from("en")
         }
     }
 
@@ -94,7 +96,10 @@ impl Args {
                                 "--twitter-gif" => self.c_twitter_gif = true,
                                 "--tt-full-audio" => self.c_tt_full_audio = true,
                                 "--tt-h265" => self.c_tt_h265 = true,
-                                "--dublang" => self.c_dublang = true,
+                                "--dublang" => {
+                                    self.c_dublang = true;
+                                    expected.push(ExpectedFlags::Language);
+                                },
                                 "--no-metadata" => self.c_disable_metadata = true,
                                 "--output" => expected.push(ExpectedFlags::Output),
                                 "--fname-style" => expected.push(ExpectedFlags::FilenamePattern),
@@ -127,7 +132,10 @@ impl Args {
                                             'g' => self.c_twitter_gif = true,
                                             'u' => self.c_tt_full_audio = true,
                                             'h' => self.c_tt_h265 = true,
-                                            'l' => self.c_dublang = true,
+                                            'l' => {
+                                                self.c_dublang = true;
+                                                expected.push(ExpectedFlags::Language);
+                                            },
                                             'n' => self.c_disable_metadata = true,
                                             'o' => expected.push(ExpectedFlags::Output),
                                             's' => expected.push(ExpectedFlags::FilenamePattern),
@@ -185,6 +193,9 @@ impl Args {
                                     } else {
                                         return Err(types::ParseError::throw_invalid("Picker choice must be an integer between 0 and 255"));
                                     }
+                                },
+                                ExpectedFlags::Language => {
+                                    self.accept_language = arg.clone();
                                 }
                             }
                         }
@@ -304,5 +315,5 @@ impl Args {
 
 #[derive(Debug)]
 enum ExpectedFlags {
-    VideoCodec, VideoQuality, AudioFormat, Output, FilenamePattern, Picker
+    VideoCodec, VideoQuality, AudioFormat, Output, FilenamePattern, Picker, Language
 }
