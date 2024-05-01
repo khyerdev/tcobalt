@@ -36,7 +36,9 @@ Global Options:
 Service-Specific Options:
 	-c --vcodec <codec>        The codec of the output [YOUTUBE] video. Codecs: h264, av1, vp9, Default: h264
 				   h264 and av1 are for .mp4 files, vp9 is for .webm files.
-	-l --dublang		   Tells cobalt to attempt downloading the [YOUTUBE] video with dubbed audio tracks
+	-l --dublang <lang>	   Tells cobalt to attempt downloading the [YOUTUBE] video with audio tracks in the given IETF language tag based off ISO 639-1
+				   IETF language tags have a specific format. Some examples are: en, es, ja, en-US, fr-CA, and zh-Hans. The default is 'en' (English)
+				   More about IETF language tags here: https://www.w3.org/International/articles/language-tags/
 	-g --twitter-gif           Tells cobalt to download the given [TWITTER] content as a gif
 	-u --tt-full-audio	   Tells cobalt to download the [TIKTOK] audio without modifications from its post author
 	-h --tt-h265		   Suggests cobalt to try downloading the [TIKTOK] video with the h265 codec
