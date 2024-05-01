@@ -15,9 +15,9 @@ Stop using random websites to download videos, just use [cobalt.tools](https://c
 * tcobalt allows you to download videos and audios just as easily as you can with [cobalt.tools](https://cobalt.tools) with `tcb get`
 * tcobalt also allows you to download multiple videos/audios at once with `tcb bulk get` and `tcb bulk execute`
 * tcobalt allows some integration with other commands, by allowing a url to be piped into `tcb get +`
-* tcobalt doesnt have ALL the settings of web cobalt, but it has the ones most people use. This may change later when I feel like it
+* tcobalt includes all the settings that web cobalt has, along with a few extra features that will get extended in the future
 * tcobalt gives methods to check cobalt's version and to list the supported services right from your terminal
-* tcobalt's help method is easy to understand, and gives the toption to list usage examples
+* tcobalt's help method is easy to understand, and gives the option to list usage examples
 * tcobalt supports single letter methods for lazy people `tcb g`, `tcb b e`
 
 ## Examples
