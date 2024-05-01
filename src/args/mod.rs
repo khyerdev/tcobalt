@@ -18,6 +18,7 @@ pub struct Args {
     pub out_filename: Option<String>,
     pub c_fname_style: types::FilenamePattern,
     pub same_filenames: bool,
+    pub picker_choice: u8,
     pub help_flag: Option<types::Help>
 }
 impl Args {
@@ -37,6 +38,7 @@ impl Args {
             help_flag: None,
             method: None,
             bulk_array: None,
+            picker_choice: 0,
             c_fname_style: types::FilenamePattern::Classic
         }
     }
@@ -84,6 +86,7 @@ impl Args {
                                 "--twitter-gif" => self.c_twitter_gif = true,
                                 "--output" => expected.push(ExpectedFlags::Output),
                                 "--fname-style" => expected.push(ExpectedFlags::FilenamePattern),
+                                "--pick" => expected.push(ExpectedFlags::Picker),
                                 _ => {
                                     if self.c_url == None && arg.contains("https://") {
                                         self.c_url = Some(arg.clone());
@@ -112,6 +115,7 @@ impl Args {
                                             'g' => self.c_twitter_gif = true,
                                             'o' => expected.push(ExpectedFlags::Output),
                                             's' => expected.push(ExpectedFlags::FilenamePattern),
+                                            'p' => expected.push(ExpectedFlags::Picker),
                                             _ => return Err(types::ParseError::throw_invalid(&format!("Invalid character {c} in multi-flag argument: {arg}")))
                                         }
                                     }
@@ -157,6 +161,13 @@ impl Args {
                                         "basic" | "b" => self.c_fname_style = types::FilenamePattern::Basic,
                                         "nerdy" | "n" => self.c_fname_style = types::FilenamePattern::Nerdy,
                                         _ => return Err(types::ParseError::throw_invalid(&format!("Invalid filename style: {arg}")))
+                                    }
+                                },
+                                ExpectedFlags::Picker => {
+                                    if let Ok(int) = arg.parse::<u8>() {
+                                        self.picker_choice = int;
+                                    } else {
+                                        return Err(types::ParseError::throw_invalid("Picker choice must be an integer between 0 and 255"));
                                     }
                                 }
                             }
@@ -277,5 +288,5 @@ impl Args {
 
 #[derive(Debug)]
 enum ExpectedFlags {
-    VideoCodec, VideoQuality, AudioFormat, Output, FilenamePattern
+    VideoCodec, VideoQuality, AudioFormat, Output, FilenamePattern, Picker
 }

@@ -2,6 +2,7 @@ mod json;
 mod args;
 mod strings;
 use std::hash::{Hash, Hasher};
+use std::io::Write;
 use std::pin::Pin;
 use std::sync::Arc;
 use tokio::sync::RwLock;
@@ -154,11 +155,50 @@ async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
             eprintln!("Cobalt returned error:\n\"{text}\"\n(when downloading from {download_url})");
             return false;
         },
-        "stream" | "redirect" => {
+        "stream" | "redirect" | "success" | "picker" => {
             if debug && status == "redirect" { eprintln!("[DEBUG {download_url}] Cobalt returned a redirect url, sending GET request ...") };
             if debug && status == "stream" { eprintln!("[DEBUG {download_url}] Cobalt returned a stream, sending GET request ...") };
 
-            let url = json.get("url").unwrap().get_str().unwrap();
+            let media = if args.c_audio_only {
+                "audio"
+            } else {
+                "video"
+            };
+
+            let url = if status == "picker" {
+                if debug { eprintln!("[DEBUG {download_url}] Cobalt returned a picker. Choosing pick and sending GET request ...") };
+
+                let urls = {
+                    let mut urls: Vec<String> = Vec::new();
+                    let picker_array = json.get("picker").unwrap().get_array().unwrap();
+                    for picker in picker_array.iter() {
+                        urls.push(picker.get_object().unwrap().get("url").unwrap().get_str().unwrap());
+                    }
+                    urls
+                };
+
+                let choice = if args.picker_choice == 0 {
+                    loop {
+                        let mut buf = String::new();
+                        print!("Choose which {media} to download [1-{}] >> ", urls.len());
+                        std::io::stdout().flush().unwrap();
+                        std::io::stdin().read_line(&mut buf).unwrap();
+                        if let Ok(int) = buf.trim().parse::<u8>() {
+                            if int as usize <= urls.len() {
+                                break int;
+                            }
+                        }
+                        println!("Input must be an integer between 1 and {}", urls.len());
+                    }
+                } else {
+                    args.picker_choice
+                };
+
+                urls[(choice - 1) as usize].clone()
+            } else {
+                json.get("url").unwrap().get_str().unwrap()
+            };
+
             let stream_request = reqwest::Client::new().get(url)
                 .header("User-Agent", &format!("tcobalt {}", VERSION.trim()));
 
@@ -166,11 +206,6 @@ async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
 
             if debug { eprintln!("[DEBUG {download_url}] Response received from stream") };
             let filename = extract_filename(&args, res.headers(), bulk, debug);
-            let media = if args.c_audio_only {
-                "audio"
-            } else {
-                "video"
-            };
             println!(
                 "Downloading {} from {} ...", 
                 media,
@@ -195,7 +230,7 @@ async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
             eprintln!("You are being rate limited by cobalt! Please try again later.\n(when downloading from {download_url})");
             return false;
         }
-        _ => unimplemented!()
+        _ => unreachable!()
     }
     true
 }
