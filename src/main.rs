@@ -195,7 +195,7 @@ async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
                     args.picker_choice
                 };
 
-                urls[(choice - 1) as usize].clone()
+                urls.get((choice - 1) as usize).unwrap_or(&urls[0]).clone()
             } else {
                 json.get("url").unwrap().get_str().unwrap()
             };
