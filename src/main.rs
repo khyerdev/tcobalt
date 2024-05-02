@@ -1,6 +1,8 @@
 mod json;
 mod args;
 mod strings;
+mod process;
+use process as proc;
 use std::hash::{Hash, Hasher};
 use std::io::Write;
 use std::pin::Pin;
@@ -110,28 +112,6 @@ async fn main() -> std::process::ExitCode {
 }
 
 async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
-    macro_rules! attempt {
-        ($try: expr, $error_msg_format: literal $(,$($extra:expr),*)?) => {{
-            let result = $try;
-            if result.is_err() {
-                let e = result.unwrap_err().to_string();
-                eprintln!($error_msg_format, e $(,$($extra)*)?);
-                return false;
-            }
-            result.unwrap()
-        }};
-        ($try: expr, $error_string_generator: expr) => {{
-            let result = $try;
-            if result.is_err() {
-                let e = result.unwrap_err().to_string();
-                let diag = $error_string_generator;
-                eprintln!("{}", diag.to_string().replace("{}", &e));
-                return false;
-            }
-            result.unwrap()
-        }};
-    }
-
     let json = cobalt_args(&args);
     let download_url: &str = args.c_url.as_ref().unwrap();
 
@@ -157,47 +137,14 @@ async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
             return false;
         },
         "stream" | "redirect" | "success" | "picker" => {
-            if debug && status == "redirect" { eprintln!("[DEBUG {download_url}] Cobalt returned a redirect url, sending GET request ...") };
-            if debug && status == "stream" { eprintln!("[DEBUG {download_url}] Cobalt returned a stream, sending GET request ...") };
+            if debug { eprintln!("[DEBUG {download_url}] Cobalt returned a response") };
+
+            let url = get_url(&args, &status, &json);
 
             let media = if args.c_audio_only {
                 "audio"
             } else {
                 "video"
-            };
-
-            let url = if status == "picker" {
-                if debug { eprintln!("[DEBUG {download_url}] Cobalt returned a picker. Choosing pick and sending GET request ...") };
-
-                let urls = {
-                    let mut urls: Vec<String> = Vec::new();
-                    let picker_array = json.get("picker").unwrap().get_array().unwrap();
-                    for picker in picker_array.iter() {
-                        urls.push(picker.get_object().unwrap().get("url").unwrap().get_str().unwrap());
-                    }
-                    urls
-                };
-
-                let choice = if args.picker_choice == 0 {
-                    loop {
-                        let mut buf = String::new();
-                        print!("Choose which {media} to download [1-{}] >> ", urls.len());
-                        std::io::stdout().flush().unwrap();
-                        std::io::stdin().read_line(&mut buf).unwrap();
-                        if let Ok(int) = buf.trim().parse::<u8>() {
-                            if int as usize <= urls.len() {
-                                break int;
-                            }
-                        }
-                        println!("Input must be an integer between 1 and {}", urls.len());
-                    }
-                } else {
-                    args.picker_choice
-                };
-
-                urls.get((choice - 1) as usize).unwrap_or(&urls[0]).clone()
-            } else {
-                json.get("url").unwrap().get_str().unwrap()
             };
 
             let stream_request = reqwest::Client::new().get(url)
@@ -248,6 +195,46 @@ fn print_cobalt_error(error: String, body: String) -> String {
         text.push_str("Contact wukko about this error. Run with TCOBALT_DEBUG=1 to see the incorrect response.")
     }
     text
+}
+
+fn get_url(args: &Args, status: &str, json: &std::collections::HashMap<String, json::JsonValue>) -> String {
+    let media = if args.c_audio_only {
+        "audio"
+    } else {
+        "video"
+    };
+
+    if status == "picker" {
+        let urls = {
+            let mut urls: Vec<String> = Vec::new();
+            let picker_array = json.get("picker").unwrap().get_array().unwrap();
+            for picker in picker_array.iter() {
+                urls.push(picker.get_object().unwrap().get("url").unwrap().get_str().unwrap());
+            }
+            urls
+        };
+
+        let choice = if args.picker_choice == 0 {
+            loop {
+                let mut buf = String::new();
+                print!("Choose which {media} to download [1-{}] >> ", urls.len());
+                std::io::stdout().flush().unwrap();
+                std::io::stdin().read_line(&mut buf).unwrap();
+                if let Ok(int) = buf.trim().parse::<u8>() {
+                    if int as usize <= urls.len() {
+                        break int;
+                    }
+                }
+                println!("Input must be an integer between 1 and {}", urls.len());
+            }
+        } else {
+            args.picker_choice
+        };
+
+        urls.get((choice - 1) as usize).unwrap_or(&urls[0]).clone()
+    } else {
+        json.get("url").unwrap().get_str().unwrap()
+    }
 }
 
 fn extract_filename(args: &Args, headers: &reqwest::header::HeaderMap, bulk: u16, debug: bool) -> String {
@@ -303,6 +290,29 @@ fn extract_filename(args: &Args, headers: &reqwest::header::HeaderMap, bulk: u16
             }
         }
     }
+}
+
+#[macro_export]
+macro_rules! attempt {
+    ($try: expr, $error_msg_format: literal $(,$($extra:expr),*)?) => {{
+        let result = $try;
+        if result.is_err() {
+            let e = result.unwrap_err().to_string();
+            eprintln!($error_msg_format, e $(,$($extra)*)?);
+            return false;
+        }
+        result.unwrap()
+    }};
+    ($try: expr, $error_string_generator: expr) => {{
+        let result = $try;
+        if result.is_err() {
+            let e = result.unwrap_err().to_string();
+            let diag = $error_string_generator;
+            eprintln!("{}", diag.to_string().replace("{}", &e));
+            return false;
+        }
+        result.unwrap()
+    }};
 }
 
 const POST_TEMPLATE: &str = "{
