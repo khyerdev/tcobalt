@@ -24,6 +24,7 @@ pub struct Args {
     pub c_fname_style: types::FilenamePattern,
     pub same_filenames: bool,
     pub picker_choice: u8,
+    pub cobalt_instance: String,
     pub help_flag: Option<types::Help>
 }
 impl Args {
@@ -49,6 +50,7 @@ impl Args {
             c_tt_h265: false,
             c_dublang: false,
             c_disable_metadata: false,
+            cobalt_instance: String::from("co.wuk.sh"),
             accept_language: String::from("en")
         }
     }
@@ -104,6 +106,7 @@ impl Args {
                                 "--output" => expected.push(ExpectedFlags::Output),
                                 "--fname-style" => expected.push(ExpectedFlags::FilenamePattern),
                                 "--pick" => expected.push(ExpectedFlags::Picker),
+                                "--instance" => expected.push(ExpectedFlags::Instance),
                                 _ => {
                                     if self.c_url == None && arg.contains("https://") {
                                         self.c_url = Some(arg.clone());
@@ -140,6 +143,7 @@ impl Args {
                                             'o' => expected.push(ExpectedFlags::Output),
                                             's' => expected.push(ExpectedFlags::FilenamePattern),
                                             'p' => expected.push(ExpectedFlags::Picker),
+                                            'i' => expected.push(ExpectedFlags::Instance),
                                             _ => return Err(types::ParseError::throw_invalid(&format!("Invalid character {c} in multi-flag argument: {arg}")))
                                         }
                                     }
@@ -196,6 +200,13 @@ impl Args {
                                 },
                                 ExpectedFlags::Language => {
                                     self.accept_language = arg.clone();
+                                },
+                                ExpectedFlags::Instance => {
+                                    let mut url = arg.replace("https://", "");
+                                    if let Some(idx) = url.find('/') {
+                                        url.truncate(idx);
+                                    }
+                                    self.cobalt_instance = url;
                                 }
                             }
                         }
@@ -315,5 +326,5 @@ impl Args {
 
 #[derive(Debug)]
 enum ExpectedFlags {
-    VideoCodec, VideoQuality, AudioFormat, Output, FilenamePattern, Picker, Language
+    VideoCodec, VideoQuality, AudioFormat, Output, FilenamePattern, Picker, Language, Instance
 }

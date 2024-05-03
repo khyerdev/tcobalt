@@ -114,7 +114,7 @@ async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
     let json = proc::cobalt_args(&args);
     let download_url: &str = args.c_url.as_ref().unwrap();
 
-    let request = reqwest::Client::new().post("https://co.wuk.sh/api/json")
+    let request = reqwest::Client::new().post(format!("https://{}/api/json", &args.cobalt_instance))
         .header("User-Agent", &format!("tcobalt {}", VERSION.trim()))
         .header("Accept", "application/json")
         .header("Content-Type", "application/json")
