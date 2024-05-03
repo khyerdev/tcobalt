@@ -1,6 +1,7 @@
 use std::io::Read;
 
 pub mod types;
+mod config;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Args {
@@ -64,6 +65,7 @@ impl Args {
                 str.into()
             }
         }).collect();
+
         match self.raw.get(1) {
             Some(method) => match method.as_str() {
                 "help" | "-h" | "--help" | "h" => {
@@ -82,6 +84,11 @@ impl Args {
                 },
                 "get" | "g" => {
                     self.method = Some(types::Method::Get);
+
+                    let mut instance_list = String::new();
+                    let mut default_args: Vec<String> = Vec::new();
+                    config::load_config_into(&mut default_args, &mut instance_list);
+
                     let mut idx = 1;
                     let mut expected: Vec<ExpectedFlags> = Vec::new();
                     let mut stdin = false;
