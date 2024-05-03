@@ -33,7 +33,7 @@ pub fn get_str(module: &str, symbol: &str) -> String {
     remove_trailing_whitespace(string)
 }
 
-fn remove_trailing_whitespace(string: impl ToString) -> String {
+pub fn remove_trailing_whitespace(string: impl ToString) -> String {
     let mut string = string.to_string();
     if string.len() == 0 { return string }
     let chars = string.chars().collect::<Vec<char>>();
