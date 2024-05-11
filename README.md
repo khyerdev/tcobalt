@@ -67,7 +67,7 @@ The repos that contain tcobalt can be seen on the right, along with the highest 
 ### Prebuilt Binary Downloads
 | Arch Linux (pkg) | Ubuntu (pkg) | Linux | Windows |
 | ---------------- | ------------ | ----- | ------- |
-| [v1.1.0-1 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.1.0/tcobalt-1.1.0-1-x86_64.pkg.tar.zst) | [v1.0.2 amd64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-1.0.2-amd64.deb) | [v1.2.0 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.2.0/tcobalt-linux-x86_64) | [v1.2.0 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.2.0/tcobalt-windows-x86_64.exe) |
+| [v1.1.0-1 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.2.0/tcobalt-1.2.0-1-x86_64.pkg.tar.zst) | [v1.0.2 amd64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-1.0.2-amd64.deb) | [v1.2.0 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.2.0/tcobalt-linux-x86_64) | [v1.2.0 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.2.0/tcobalt-windows-x86_64.exe) |
 
 ### Arch Linux
 1. Install `yay` or `paru`:
