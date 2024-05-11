@@ -17,6 +17,8 @@ Stop using random websites to download videos, just use [cobalt.tools](https://c
 * tcobalt allows some integration with other commands, by allowing a url to be piped into `tcb get +`
 * tcobalt includes all the settings that web cobalt has, along with a few extra features that will get extended in the future
 * tcobalt gives methods to check cobalt's version and to list the supported services right from your terminal
+* tcobalt has support for using a different cobalt api instance than the main one
+* You can change the default tcobalt flags in a configuration file
 * tcobalt's help method is easy to understand, and gives the option to list usage examples
 * tcobalt supports single letter methods for lazy people `tcb g`, `tcb b e`
 
@@ -65,7 +67,7 @@ The repos that contain tcobalt can be seen on the right, along with the highest 
 ### Prebuilt Binary Downloads
 | Arch Linux (pkg) | Ubuntu (pkg) | Linux | Windows |
 | ---------------- | ------------ | ----- | ------- |
-| [v1.1.0-1 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.1.0/tcobalt-1.1.0-1-x86_64.pkg.tar.zst) | [v1.0.2 amd64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-1.0.2-amd64.deb) | [v1.1.0 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.1.0/tcobalt-linux-x86_64) | [v1.1.0 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.1.0/tcobalt-windows-x86_64.exe) |
+| [v1.1.0-1 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.1.0/tcobalt-1.1.0-1-x86_64.pkg.tar.zst) | [v1.0.2 amd64](https://github.com/khyerdev/tcobalt/releases/download/v1.0.2-2/tcobalt-1.0.2-amd64.deb) | [v1.2.0 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.2.0/tcobalt-linux-x86_64) | [v1.2.0 x86_64](https://github.com/khyerdev/tcobalt/releases/download/v1.2.0/tcobalt-windows-x86_64.exe) |
 
 ### Arch Linux
 1. Install `yay` or `paru`:
