@@ -85,9 +85,11 @@ impl Args {
                 "get" | "g" => {
                     self.method = Some(types::Method::Get);
 
-                    let mut instance_list = String::new();
+                    let mut instance_list: Vec<String> = Vec::new();
                     let mut default_args: Vec<String> = Vec::new();
                     config::load_config_into(&mut default_args, &mut instance_list);
+                    let (pre_args, added_args) = self.raw.split_at(2);
+                    self.raw = [pre_args, &default_args, added_args].concat().to_vec();
 
                     let mut idx = 1;
                     let mut expected: Vec<ExpectedFlags> = Vec::new();
@@ -100,16 +102,16 @@ impl Args {
                                 "--vcodec" => expected.push(ExpectedFlags::VideoCodec),
                                 "--vquality" => expected.push(ExpectedFlags::VideoQuality),
                                 "--aformat" => expected.push(ExpectedFlags::AudioFormat),
-                                "--audio-only" => self.c_audio_only = true,
-                                "--mute-audio" => self.c_audio_muted = true,
-                                "--twitter-gif" => self.c_twitter_gif = true,
-                                "--tt-full-audio" => self.c_tt_full_audio = true,
-                                "--tt-h265" => self.c_tt_h265 = true,
+                                "--audio-only" => self.c_audio_only = !self.c_audio_only,
+                                "--mute-audio" => self.c_audio_muted = !self.c_audio_muted,
+                                "--twitter-gif" => self.c_twitter_gif = !self.c_twitter_gif,
+                                "--tt-full-audio" => self.c_tt_full_audio = !self.c_tt_full_audio,
+                                "--tt-h265" => self.c_tt_h265 = !self.c_tt_h265,
                                 "--dublang" => {
                                     self.c_dublang = true;
                                     expected.push(ExpectedFlags::Language);
                                 },
-                                "--no-metadata" => self.c_disable_metadata = true,
+                                "--no-metadata" => self.c_disable_metadata = !self.c_disable_metadata,
                                 "--output" => expected.push(ExpectedFlags::Output),
                                 "--fname-style" => expected.push(ExpectedFlags::FilenamePattern),
                                 "--pick" => expected.push(ExpectedFlags::Picker),
@@ -137,16 +139,16 @@ impl Args {
                                             'c' => expected.push(ExpectedFlags::VideoCodec),
                                             'q' => expected.push(ExpectedFlags::VideoQuality),
                                             'f' => expected.push(ExpectedFlags::AudioFormat),
-                                            'a' => self.c_audio_only = true,
-                                            'm' => self.c_audio_muted = true,
-                                            'g' => self.c_twitter_gif = true,
-                                            'u' => self.c_tt_full_audio = true,
-                                            'h' => self.c_tt_h265 = true,
+                                            'a' => self.c_audio_only = !self.c_audio_only,
+                                            'm' => self.c_audio_muted = !self.c_audio_muted,
+                                            'g' => self.c_twitter_gif = !self.c_twitter_gif,
+                                            'u' => self.c_tt_full_audio = !self.c_tt_full_audio,
+                                            'h' => self.c_tt_h265 = !self.c_tt_h265,
                                             'l' => {
                                                 self.c_dublang = true;
                                                 expected.push(ExpectedFlags::Language);
                                             },
-                                            'n' => self.c_disable_metadata = true,
+                                            'n' => self.c_disable_metadata = !self.c_disable_metadata,
                                             'o' => expected.push(ExpectedFlags::Output),
                                             's' => expected.push(ExpectedFlags::FilenamePattern),
                                             'p' => expected.push(ExpectedFlags::Picker),
@@ -209,7 +211,16 @@ impl Args {
                                     self.accept_language = arg.clone();
                                 },
                                 ExpectedFlags::Instance => {
-                                    let mut url = arg.replace("https://", "");
+                                    let mut url = if let Ok(choice) = arg.parse::<u8>() {
+                                        if let Some(url) = instance_list.get((choice-1) as usize) {
+                                            url.clone()
+                                        } else {
+                                            return Err(types::ParseError::throw_invalid("Invalid instance quick-choice"))
+                                        }
+                                    } else {
+                                        arg.clone()
+                                    };
+                                    url = url.replace("https://", "");
                                     if let Some(idx) = url.find('/') {
                                         url.truncate(idx);
                                     }
