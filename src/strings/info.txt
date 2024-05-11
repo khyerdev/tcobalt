@@ -23,3 +23,27 @@ vimeo
 vine archive
 vk video & clips (full video+audio only)
 youtube videos, shorts & music
+
+[default-config]
+\[default]
+vcodec = h264
+vquality = 1080
+aformat = mp3
+audio-only = false
+mute-audio = false
+twitter-gif = false
+tt-full-audio = false
+tt-h265 = false
+dublang = none
+no-metadata = false
+fname-style = classic
+instance = co.wuk.sh
+
+\[default.instances]
+co.wuk.sh
+co-api.mae.wtf
+co.eepy.today
+co.tskau.team
+cobalt.wither.ing
+cobalt.canine.tools
+

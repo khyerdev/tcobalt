@@ -77,6 +77,8 @@ impl Args {
                             "bulk" | "b" => self.help_flag = Some(types::Help::Bulk),
                             "help" | "h" => self.help_flag = Some(types::Help::Help),
                             "examples" | "e" => self.help_flag = Some(types::Help::Examples),
+                            "gen-config" | "gc" => self.help_flag = Some(types::Help::GenConfig),
+                            "config" | "c" => self.help_flag = Some(types::Help::Config),
                             _ => self.help_flag = Some(types::Help::Help)
                         },
                         None => self.help_flag = Some(types::Help::Help),
@@ -325,6 +327,7 @@ impl Args {
                 "list" | "l" => self.method = Some(types::Method::List),
                 "version" | "v" | "-v" | "--version" => self.method = Some(types::Method::Version),
                 "cobalt-version" | "cv" | "c" => self.method = Some(types::Method::CobaltVersion),
+                "gen-config" | "gc" => self.method = Some(types::Method::GenConfig),
 
                 unknown => return Err(types::ParseError::throw_invalid(&format!("Unrecognized tcobalt method: {}", unknown)))
             },

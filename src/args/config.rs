@@ -3,7 +3,7 @@ use std::path::PathBuf;
 #[cfg(unix)]
 const CONFIG_PATH: &str = "$CFG/.config/tcobalt.conf";
 #[cfg(target_os = "windows")]
-const CONFIG_PATH: &str = "$CFG/tcobalt.conf";
+const CONFIG_PATH: &str = "$CFG\\tcobalt.conf";
 
 pub fn load_config_into(args: &mut Vec<String>, instance_list: &mut Vec<String>) {
     let path = PathBuf::from({

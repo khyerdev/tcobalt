@@ -45,11 +45,11 @@ impl FilenamePattern {
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Help {
-    Get, List, Bulk, Help, Examples
+    Get, List, Bulk, Help, Examples, Config, GenConfig
 }
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Method {
-    Get, List, Bulk, Help, Version, CobaltVersion
+    Get, List, Bulk, Help, Version, CobaltVersion, GenConfig
 }
 
 #[derive(Debug, PartialEq, Eq)]

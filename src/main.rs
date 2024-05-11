@@ -37,6 +37,8 @@ async fn main() -> std::process::ExitCode {
             args::types::Help::Bulk => println!("{}", strings::get_str("usage", "bulk")),
             args::types::Help::Get => println!("{}", strings::get_str("usage", "get")),
             args::types::Help::Examples => println!("{}", strings::get_str("usage", "examples")),
+            args::types::Help::GenConfig => println!("{}", strings::get_str("usage", "gen-config")),
+            args::types::Help::Config => println!("{}", strings::get_str("usage", "config")),
         }
         return std::process::ExitCode::SUCCESS;
     }
@@ -106,6 +108,23 @@ async fn main() -> std::process::ExitCode {
             println!("Cobalt (by wukko) version {version}");
             println!("Latest commit on branch \"{branch}\": {commit}");
         },
+        args::types::Method::GenConfig => {
+            let text = strings::get_str("info", "default-config").replace("\\", "");
+            let path = std::path::PathBuf::from({
+                if cfg!(target_os = "windows") {
+                    "$CFG\\tcobalt.conf".replace("$CFG", &std::env::var("LOCALAPPDATA").expect("no localappdata var"))
+                } else {
+                    "$CFG/.config/tcobalt.conf".replace("$CFG", &std::env::var("HOME").expect("no home var"))
+                }
+            });
+
+            if let Ok(()) = std::fs::write(&path, text) {
+                println!("Wrote default config to {}", path.to_string_lossy());
+                return std::process::ExitCode::SUCCESS
+            } else {
+                return std::process::ExitCode::FAILURE
+            }
+        }
     }
     std::process::ExitCode::SUCCESS
 }
