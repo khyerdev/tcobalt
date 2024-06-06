@@ -1,6 +1,6 @@
 [package]
 name = "tcobalt"
-version = "1.2.0"
+version = "1.2.1"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -9,6 +9,9 @@ edition = "2021"
 futures = { version = "0.3.30", default-features = false, features = ["alloc"] }
 reqwest = "0.11.26"
 tokio = { version = "1.37.0", default-features = false, features = ["rt-multi-thread", "macros", "fs"] }
+
+[target.'cfg(target_arch = "aarch64")'.dependencies]
+openssl = { version = "0.10.29", features = ["vendored"] }
 
 [profile.release]
 opt-level = "s"

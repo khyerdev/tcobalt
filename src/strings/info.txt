@@ -8,7 +8,7 @@ The code and license is available at https://github.com/khyerdev/tcobalt
 [supported]
 bilibili.com & bilibili.tv
 dailymotion videos
-instagram reels, posts & stories
+instagram reels, posts & stories (rarely works)
 ok video (full video+audio only)
 pinterest videos & stories
 reddit videos & gifs
@@ -37,13 +37,14 @@ tt-h265 = false
 dublang = none
 no-metadata = false
 fname-style = classic
-instance = co.wuk.sh
+instance = api.cobalt.tools
 
 \[default.instances]
-co.wuk.sh
-co-api.mae.wtf
+api.cobalt.tools
+capi.oak.li
 co.eepy.today
 co.tskau.team
 cobalt.wither.ing
 cobalt.canine.tools
-
+wukko.wolfdo.gg
+cobalt.misike.eu
