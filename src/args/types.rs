@@ -42,6 +42,15 @@ impl FilenamePattern {
         format!("{self:?}").to_lowercase()
     }
 }
+#[derive(Debug, PartialEq, Eq, Clone)]
+pub enum DownloadMode {
+    Auto, Audio, Mute
+}
+impl Default for DownloadMode {
+    fn default() -> Self {
+        Self::Auto
+    }
+}
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Help {
@@ -49,7 +58,7 @@ pub enum Help {
 }
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum Method {
-    Get, List, Bulk, Help, Version, CobaltVersion, GenConfig
+    Get, List, Bulk, Help, Version, CobaltVersion(String), GenConfig
 }
 
 #[derive(Debug, PartialEq, Eq)]

@@ -7,12 +7,16 @@ The code and license is available at https://github.com/khyerdev/tcobalt
 
 [supported]
 bilibili.com & bilibili.tv
+bluesky
 dailymotion videos
 instagram reels, posts & stories (rarely works)
+facebook
+loom
 ok video (full video+audio only)
 pinterest videos & stories
 reddit videos & gifs
 rutube videos
+snapchat
 soundcloud (audio only)
 streamable.com
 tiktok videos, photos & audio
@@ -29,22 +33,21 @@ youtube videos, shorts & music
 vcodec = h264
 vquality = 1080
 aformat = mp3
-audio-only = false
-mute-audio = false
+bitrate = 128
+download-mode = auto
 twitter-gif = false
 tt-full-audio = false
 tt-h265 = false
 dublang = none
 no-metadata = false
 fname-style = classic
+proxy = false
 instance = api.cobalt.tools
 
 \[default.instances]
 api.cobalt.tools
-capi.oak.li
+dl.khyernet.xyz
 co.eepy.today
-co.tskau.team
-cobalt.wither.ing
-cobalt.canine.tools
-wukko.wolfdo.gg
-cobalt.misike.eu
+cobalt.api.timelessnesses.me
+beta.cobalt.canine.tools
+ca.haloz.at

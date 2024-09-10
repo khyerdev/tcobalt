@@ -13,12 +13,11 @@ pub struct Args {
     pub c_video_codec: types::VideoCodec,
     pub c_video_quality: u16,
     pub c_audio_format: types::AudioFormat,
-    pub c_audio_only: bool,
-    pub c_audio_muted: bool,
+    pub c_audio_bitrate: u16,
+    pub c_download_mode: types::DownloadMode,
     pub c_twitter_gif: bool,
     pub c_tt_full_audio: bool,
     pub c_tt_h265: bool,
-    pub c_dublang: bool,
     pub c_disable_metadata: bool,
     pub accept_language: String,
     pub out_filename: Option<String>,
@@ -26,7 +25,8 @@ pub struct Args {
     pub same_filenames: bool,
     pub picker_choice: u8,
     pub cobalt_instance: String,
-    pub help_flag: Option<types::Help>
+    pub help_flag: Option<types::Help>,
+    pub c_proxy: bool
 }
 impl Args {
     pub fn get() -> Self {
@@ -37,11 +37,11 @@ impl Args {
             c_video_codec: types::VideoCodec::H264,
             c_video_quality: 1080,
             c_audio_format: types::AudioFormat::MP3,
-            c_audio_only: false,
-            c_audio_muted: false,
+            c_download_mode: types::DownloadMode::Auto,
             c_twitter_gif: false,
             out_filename: None,
             same_filenames: false,
+            c_audio_bitrate: 128,
             help_flag: None,
             method: None,
             bulk_array: None,
@@ -49,9 +49,9 @@ impl Args {
             c_fname_style: types::FilenamePattern::Classic,
             c_tt_full_audio: false,
             c_tt_h265: false,
-            c_dublang: false,
             c_disable_metadata: false,
-            cobalt_instance: String::from("co.wuk.sh"),
+            c_proxy: false,
+            cobalt_instance: String::from("api.cobalt.tools"),
             accept_language: String::from("en")
         }
     }
@@ -104,20 +104,20 @@ impl Args {
                                 "--vcodec" => expected.push(ExpectedFlags::VideoCodec),
                                 "--vquality" => expected.push(ExpectedFlags::VideoQuality),
                                 "--aformat" => expected.push(ExpectedFlags::AudioFormat),
-                                "--audio-only" => self.c_audio_only = !self.c_audio_only,
-                                "--mute-audio" => self.c_audio_muted = !self.c_audio_muted,
+                                "--audio-only" => self.c_download_mode = types::DownloadMode::Audio,
+                                "--mute-audio" => self.c_download_mode = types::DownloadMode::Mute,
+                                "--auto" => self.c_download_mode = types::DownloadMode::Auto,
                                 "--twitter-gif" => self.c_twitter_gif = !self.c_twitter_gif,
                                 "--tt-full-audio" => self.c_tt_full_audio = !self.c_tt_full_audio,
                                 "--tt-h265" => self.c_tt_h265 = !self.c_tt_h265,
-                                "--dublang" => {
-                                    self.c_dublang = true;
-                                    expected.push(ExpectedFlags::Language);
-                                },
+                                "--dublang" => expected.push(ExpectedFlags::Language),
                                 "--no-metadata" => self.c_disable_metadata = !self.c_disable_metadata,
                                 "--output" => expected.push(ExpectedFlags::Output),
                                 "--fname-style" => expected.push(ExpectedFlags::FilenamePattern),
                                 "--pick" => expected.push(ExpectedFlags::Picker),
                                 "--instance" => expected.push(ExpectedFlags::Instance),
+                                "--bitrate" => expected.push(ExpectedFlags::Bitrate),
+                                "--proxy" => self.c_proxy = !self.c_proxy,
                                 _ => {
                                     if self.c_url == None && arg.contains("https://") {
                                         self.c_url = Some(arg.clone());
@@ -141,13 +141,12 @@ impl Args {
                                             'c' => expected.push(ExpectedFlags::VideoCodec),
                                             'q' => expected.push(ExpectedFlags::VideoQuality),
                                             'f' => expected.push(ExpectedFlags::AudioFormat),
-                                            'a' => self.c_audio_only = !self.c_audio_only,
-                                            'm' => self.c_audio_muted = !self.c_audio_muted,
+                                            'a' => self.c_download_mode = types::DownloadMode::Audio,
+                                            'm' => self.c_download_mode = types::DownloadMode::Mute,
                                             'g' => self.c_twitter_gif = !self.c_twitter_gif,
                                             'u' => self.c_tt_full_audio = !self.c_tt_full_audio,
                                             'h' => self.c_tt_h265 = !self.c_tt_h265,
                                             'l' => {
-                                                self.c_dublang = true;
                                                 expected.push(ExpectedFlags::Language);
                                             },
                                             'n' => self.c_disable_metadata = !self.c_disable_metadata,
@@ -155,6 +154,9 @@ impl Args {
                                             's' => expected.push(ExpectedFlags::FilenamePattern),
                                             'p' => expected.push(ExpectedFlags::Picker),
                                             'i' => expected.push(ExpectedFlags::Instance),
+                                            'x' => self.c_proxy = !self.c_proxy,
+                                            '=' => self.c_download_mode = types::DownloadMode::Auto,
+                                            'b' => expected.push(ExpectedFlags::Bitrate),
                                             _ => return Err(types::ParseError::throw_invalid(&format!("Invalid character {c} in multi-flag argument: {arg}")))
                                         }
                                     }
@@ -227,6 +229,13 @@ impl Args {
                                         url.truncate(idx);
                                     }
                                     self.cobalt_instance = url;
+                                },
+                                ExpectedFlags::Bitrate => {
+                                    if arg == "320" || arg == "256" || arg == "128" || arg == "96" || arg == "64" || arg == "8" {
+                                        self.c_audio_bitrate = arg.parse::<u16>().unwrap();
+                                    } else {
+                                        return Err(types::ParseError::throw_invalid("Make sure you select a valid bitrate! (320/256/128/96/64/8)"));
+                                    }
                                 }
                             }
                         }
@@ -326,7 +335,13 @@ impl Args {
                 },
                 "list" | "l" => self.method = Some(types::Method::List),
                 "version" | "v" | "-v" | "--version" => self.method = Some(types::Method::Version),
-                "cobalt-version" | "cv" | "c" => self.method = Some(types::Method::CobaltVersion),
+                "cobalt-version" | "cv" | "c" => {
+                    if self.raw.get(2).is_some() {
+                        self.method = Some(types::Method::CobaltVersion(self.raw[2].clone()))
+                    } else {
+                        self.method = Some(types::Method::CobaltVersion(String::from("api.cobalt.tools")))
+                    }
+                },
                 "gen-config" | "gc" => self.method = Some(types::Method::GenConfig),
 
                 unknown => return Err(types::ParseError::throw_invalid(&format!("Unrecognized tcobalt method: {}", unknown)))
@@ -347,5 +362,5 @@ impl Args {
 
 #[derive(Debug)]
 enum ExpectedFlags {
-    VideoCodec, VideoQuality, AudioFormat, Output, FilenamePattern, Picker, Language, Instance
+    VideoCodec, VideoQuality, AudioFormat, Output, FilenamePattern, Picker, Language, Instance, Bitrate
 }

@@ -83,12 +83,14 @@ async fn main() -> std::process::ExitCode {
         args::types::Method::List => println!("{}", strings::get_str("info", "supported")),
         args::types::Method::Help => unreachable!(),
         args::types::Method::Version => println!("{}", strings::get_str("info", "version").replace("{}", VERSION.trim())),
-        args::types::Method::CobaltVersion => {
-            let request = reqwest::Client::new().get("https://co.wuk.sh/api/serverInfo")
+        args::types::Method::CobaltVersion(api_url) => {
+            let request = reqwest::Client::new().get(format!("https://{}/", api_url))
                 .header("User-Agent", &format!("tcobalt {}", VERSION.trim()));
             if debug { eprintln!("[DEBUG] Sending GET request to cobalt ...") };
             let ver = match request.send().await {
-                Ok(res) => res.text().await.unwrap_or("{\"version\":\"unknown\",\"commit\":\"unknown\",\"branch\":\"unknown\"}".to_string()),
+                Ok(res) => {
+                    res.text().await.expect("cobalt returned nothing")
+                },
                 Err(e) => {
                     eprintln!("Cobalt server did not respond: {}", e.to_string());
                     return std::process::ExitCode::FAILURE;
@@ -102,10 +104,12 @@ async fn main() -> std::process::ExitCode {
                     return std::process::ExitCode::FAILURE;
                 }
             };
-            let version = stats.get("version").unwrap().get_str().unwrap();
-            let commit = stats.get("commit").unwrap().get_str().unwrap();
-            let branch = stats.get("branch").unwrap().get_str().unwrap();
-            println!("Cobalt (by wukko) version {version}");
+            let cobalt = stats.get("cobalt").unwrap().get_object().unwrap();
+            let git = stats.get("git").unwrap().get_object().unwrap();
+            let version = cobalt.get("version").unwrap().get_str().unwrap();
+            let commit = git.get("commit").unwrap().get_str().unwrap();
+            let branch = git.get("branch").unwrap().get_str().unwrap();
+            println!("Cobalt (by wukko and jj) version {version}");
             println!("Latest commit on branch \"{branch}\": {commit}");
         },
         args::types::Method::GenConfig => {
@@ -133,11 +137,10 @@ async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
     let json = proc::cobalt_args(&args);
     let download_url: &str = args.c_url.as_ref().unwrap();
 
-    let request = reqwest::Client::new().post(format!("https://{}/api/json", &args.cobalt_instance))
+    let request = reqwest::Client::new().post(format!("https://{}/", &args.cobalt_instance))
         .header("User-Agent", &format!("tcobalt {}", VERSION.trim()))
         .header("Accept", "application/json")
         .header("Content-Type", "application/json")
-        .header("Accept-Language", &args.accept_language)
         .body(json);
 
     if debug { eprintln!("[DEBUG {download_url}] Sending POST request to cobalt server ...") };
@@ -150,16 +153,16 @@ async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
     let status = json.get("status".into()).unwrap().get_str().unwrap();
     match status.as_str() {
         "error" => {
-            let text = json.get("text").unwrap().get_str().unwrap();
-            eprintln!("Cobalt returned error:\n\"{text}\"\n(when downloading from {download_url})");
+            let text = json.get("error".into()).unwrap().get_object().unwrap().get("code".into()).unwrap().get_str().unwrap();
+            eprintln!("Cobalt returned error: \"{text}\" (when downloading from {download_url})");
             return false;
         },
-        "stream" | "redirect" | "success" | "picker" => {
+        "tunnel" | "redirect" | "picker" => {
             if debug { eprintln!("[DEBUG {download_url}] Cobalt returned a response") };
 
             let url = proc::get_url(&args, &status, &json);
 
-            let media = if args.c_audio_only {
+            let media = if args.c_download_mode == tcargs::types::DownloadMode::Audio {
                 "audio"
             } else {
                 "video"
@@ -171,7 +174,13 @@ async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
             let res = attempt!(stream_request.send().await, "Live renderer did not respond:\n\"{}\"\n(when downloading from {download_url})");
 
             if debug { eprintln!("[DEBUG {download_url}] Response received from stream") };
-            let filename = proc::extract_filename(&args, res.headers(), bulk, debug);
+            let mut filename = json.get("filename".into()).unwrap().get_str().unwrap();
+            if let Some(custom_name) = args.out_filename {
+                filename = custom_name;
+            }
+            if bulk > 0 {
+                filename = format!("{bulk}_{filename}");
+            }
             println!(
                 "Downloading {} from {} ...", 
                 media,
@@ -192,10 +201,6 @@ async fn execute_get_media(args: Args, bulk: u16, debug: bool) -> bool {
 
             println!("Your {media} is ready! >> {display}")
         },
-        "rate-limit" => {
-            eprintln!("You are being rate limited by cobalt! Please try again later.\n(when downloading from {download_url})");
-            return false;
-        }
         _ => unreachable!()
     }
     true

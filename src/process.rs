@@ -1,6 +1,5 @@
 use crate::{tcargs, args::Args, json};
 use std::io::Write;
-use std::hash::{Hash, Hasher};
 
 pub fn print_json_error(error: String, body: String) -> String {
     let mut text = String::new();
@@ -17,7 +16,7 @@ pub fn print_json_error(error: String, body: String) -> String {
 }
 
 pub fn get_url(args: &Args, status: &str, json: &std::collections::HashMap<String, json::JsonValue>) -> String {
-    let media = if args.c_audio_only {
+    let media = if args.c_download_mode == tcargs::types::DownloadMode::Audio {
         "audio"
     } else {
         "video"
@@ -28,7 +27,11 @@ pub fn get_url(args: &Args, status: &str, json: &std::collections::HashMap<Strin
             let mut urls: Vec<String> = Vec::new();
             let picker_array = json.get("picker").unwrap().get_array().unwrap();
             for picker in picker_array.iter() {
-                urls.push(picker.get_object().unwrap().get("url").unwrap().get_str().unwrap());
+                let picker = picker.get_object().unwrap();
+                let cobalt_type = picker.get("type".into()).unwrap().get_str().unwrap();
+                if cobalt_type == String::from("video") || cobalt_type == String::from("gif") {
+                    urls.push(picker.get("url".into()).unwrap().get_str().unwrap());
+                }
             }
             urls
         };
@@ -56,74 +59,20 @@ pub fn get_url(args: &Args, status: &str, json: &std::collections::HashMap<Strin
     }
 }
 
-pub fn extract_filename(args: &Args, headers: &reqwest::header::HeaderMap, bulk: u16, debug: bool) -> String {
-    match &args.out_filename {
-        Some(name) => {
-            if bulk > 0 {
-                format!("{bulk}-{name}")
-            } else {
-                name.to_string()
-            }
-        },
-        None => {
-            let download_url = args.c_url.clone().unwrap();
-            if debug { eprintln!("[DEBUG {download_url}] Obtaining filename from headers") };
-            match headers.get("Content-Disposition") {
-                Some(disposition) => {
-                    let disposition = disposition.to_str().unwrap();
-                    let mut pass: u8 = 0;
-                    let mut filename = String::new();
-                    for c in disposition.chars() {
-                        if c == ';' || c == '\"' {
-                            pass += 1;
-                            continue;
-                        }
-                        if pass == 2 {
-                            filename.push(c);
-                        }
-                        if pass == 3 {
-                            break;
-                        }
-                    }
-                    filename
-                },
-                None => {
-                    if debug { eprintln!("[DEBUG {download_url}] No filename specified, generating random filename ...") };
-                    let mut hasher = std::collections::hash_map::DefaultHasher::new();
-                    download_url.hash(&mut hasher);
-                    let mut hash = format!("{:x}", hasher.finish());
-                    if args.c_twitter_gif {
-                        hash.push_str(".gif");
-                    } else {
-                        match args.c_video_codec {
-                            tcargs::types::VideoCodec::AV1 | tcargs::types::VideoCodec::H264 => {
-                                hash.push_str(".mp4");
-                            }
-                            tcargs::types::VideoCodec::VP9 => {
-                                hash.push_str(".webm");
-                            }
-                        }
-                    }
-                    hash
-                }
-            }
-        }
-    }
-}
-
 const POST_TEMPLATE: &str = "{
     \"url\": \"<url>\",
-    \"vCodec\": \"<vcodec>\",
-    \"vQuality\": \"<vquality>\",
-    \"aFormat\": \"<aformat>\",
-    \"filenamePattern\": \"<fname-style>\",
-    \"isAudioOnly\": <audio-only>,
-    \"isTTFullAudio\": <tt-full-audio>,
+    \"youtubeVideoCodec\": \"<vcodec>\",
+    \"videoQuality\": \"<vquality>\",
+    \"audioFormat\": \"<aformat>\",
+    \"audioBitrate\": \"<bitrate>\",
+    \"filenameStyle\": \"<fname-style>\",
+    \"downloadMode\": \"<download>\",
+    \"tiktokFullAudio\": <tt-full-audio>,
     \"tiktokH265\": <tt-h265>,
-    \"isAudioMuted\": <audio-muted>,
-    \"dubLang\": <dublang>,
+    \"youtubeDubLang\": \"<dublang>\",
     \"disableMetadata\": <no-metadata>,
-    \"twitterGif\": <twitter-gif>
+    \"twitterGif\": <twitter-gif>,
+    \"alwaysProxy\": <proxy>
     }";
 pub fn cobalt_args(args_in: &Args) -> String {
     POST_TEMPLATE.to_string()
@@ -134,11 +83,12 @@ pub fn cobalt_args(args_in: &Args) -> String {
         .replace("<fname-style>", &args_in.c_fname_style.print())
         .replace("<tt-full-audio>", &args_in.c_tt_full_audio.to_string())
         .replace("<tt-h265>", &args_in.c_tt_h265.to_string())
-        .replace("<audio-only>", &args_in.c_audio_only.to_string())
-        .replace("<audio-muted>", &args_in.c_audio_muted.to_string())
-        .replace("<dublang>", &args_in.c_dublang.to_string())
+        .replace("<download>", &format!("{:?}", args_in.c_download_mode).to_lowercase())
+        .replace("<dublang>", &args_in.accept_language)
         .replace("<no-metadata>", &args_in.c_disable_metadata.to_string())
         .replace("<twitter-gif>", &args_in.c_twitter_gif.to_string())
+        .replace("<proxy>", &args_in.c_proxy.to_string())
+        .replace("<bitrate>", &args_in.c_audio_bitrate.to_string())
 }
 
 #[macro_export]

@@ -35,13 +35,17 @@ pub fn load_config_into(args: &mut Vec<String>, instance_list: &mut Vec<String>)
                     args.push("-f".into());
                     args.push(option[1].into())
                 },
-                "audio-only" => {
+                "proxy" => {
                     if option[1].to_lowercase().as_str() == "true" {
-                        args.push("-a".into())
+                        args.push("-x".into())
                     }
-                },
-                "mute-audio" => {
-                    if option[1].to_lowercase().as_str() == "true" {
+                }
+                "download-mode" => {
+                    if option[1].to_lowercase().as_str() == "auto" {
+                        args.push("-=".into())
+                    } else if option[1].to_lowercase().as_str() == "audio" {
+                        args.push("-a".into())
+                    } else if option[1].to_lowercase().as_str() == "mute" {
                         args.push("-m".into())
                     }
                 },
@@ -79,6 +83,10 @@ pub fn load_config_into(args: &mut Vec<String>, instance_list: &mut Vec<String>)
                     args.push("-i".into());
                     args.push(option[1].into())
                 },
+                "bitrate" => {
+                    args.push("-b".into());
+                    args.push(option[1].into())
+                }
                 _ => ()
             }
         }
