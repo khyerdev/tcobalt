@@ -32,8 +32,7 @@ fn args_get() {
     assert_eq!(args1.c_video_codec, types::VideoCodec::H264);
     assert_eq!(args1.c_video_quality, 1080);
     assert_eq!(args1.c_audio_format, types::AudioFormat::MP3);
-    assert_eq!(args1.c_audio_only, false);
-    assert_eq!(args1.c_audio_muted, false);
+    assert_eq!(args1.c_download_mode, types::DownloadMode::Auto);
     assert_eq!(args1.c_twitter_gif, false);
 
     assert_eq!(args2.c_video_codec, types::VideoCodec::AV1);
@@ -41,11 +40,11 @@ fn args_get() {
     assert_eq!(args3.c_url, Some(url.to_string()));
     assert_eq!(args4.c_video_codec, types::VideoCodec::VP9);
     assert_eq!(args4.c_video_quality, 720);
-    assert_eq!(args5.c_audio_only, true);
+    assert_eq!(args5.c_download_mode, types::DownloadMode::Audio);
     assert_eq!(args5.c_audio_format, types::AudioFormat::OGG);
     assert_eq!(args5.out_filename, Some("foo.ogg".into()));
     assert_eq!(args6.c_twitter_gif, true);
-    assert_eq!(args6.c_audio_muted, true);
+    assert_eq!(args6.c_download_mode, types::DownloadMode::Mute);
     assert_eq!(args6.out_filename, Some("bar.gif".into()));
 }
 
