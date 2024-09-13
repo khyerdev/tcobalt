@@ -11,6 +11,8 @@ tcobalt (or tcb) is a command-line tool for downloading your favorite videos and
 <img src=https://github.com/OSCH2008/tcobalt/assets/82794982/f12acec9-c668-4b8b-819c-1256fe802915 style="width: 100%"></img>
 Stop using random websites to download videos, just use [cobalt.tools](https://cobalt.tools), or the unofficial command-line version, tcobalt.
 
+NOTICE: As of September 10th, the newest version of [cobalt.tools](https://cobalt.tools) contains breaking api changes. I made the changes necessary but ran into a massive issue that I do not feel motivated to fix. See [issue #1](https://github.com/khyerdev/tcobalt/issues/1) for more details.
+
 ## Features
 * tcobalt allows you to download videos and audios just as easily as you can with [cobalt.tools](https://cobalt.tools) with `tcb get`
 * tcobalt also allows you to download multiple videos/audios at once with `tcb bulk get` and `tcb bulk execute`
