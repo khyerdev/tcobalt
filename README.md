@@ -3,15 +3,25 @@
 [![GitHub Release](https://img.shields.io/github/v/release/khyerdev/tcobalt)](https://github.com/khyerdev/tcobalt/releases/)
 [![GitHub License](https://img.shields.io/github/license/khyerdev/tcobalt)](https://github.com/khyerdev/tcobalt/blob/main/LICENSE)
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/khyerdev/tcobalt/auto_tests.yml?label=tests)](https://github.com/khyerdev/tcobalt/actions)
-[![Evil Purged](https://img.shields.io/badge/evil-purged-red)]()
+[![Evil Purged](https://img.shields.io/badge/working-nah-red)]()
+
+### NOTICE
+
+As of September 10th, the newest version of [cobalt.tools](https://cobalt.tools) contains breaking api changes. I made the changes necessary but ran into a "massive" issue that I do not feel motivated to fix. See [issue #1](https://github.com/khyerdev/tcobalt/issues/1) for more details.
+
+As of October 18th, I have decided to orphan this project simply because I have lost interest in it and do not want to fix the aformentioned issue. Below are 3 projects I recommend checking out that most likely do things better than tcobalt:
+
+* [lostdusty/cobalt](https://github.com/lostdusty/cobalt): Cobalt CLI written in golang
+* [lostdusty/gobalt](https://github.com/lostdusty/gobalt): Golang library for the Cobalt API
+* [tskau/tobalt](https://github.com/tskau/tobalt): Typescript library for the Cobalt API
+
+If you still wish to gain insight of what this project was like, feel free to read through this document, the code, and/or compile this yourself.
 
 # tcobalt Command Line Utility
 
 tcobalt (or tcb) is a command-line tool for downloading your favorite videos and audios from the internet. This tool uses the api of [wukko](https://github.com/wukko)'s [cobalt.tools](https://cobalt.tools), which is an amazing website to save what you love without ads, trackers, or anything creepy.
 <img src=https://github.com/OSCH2008/tcobalt/assets/82794982/f12acec9-c668-4b8b-819c-1256fe802915 style="width: 100%"></img>
 Stop using random websites to download videos, just use [cobalt.tools](https://cobalt.tools), or the unofficial command-line version, tcobalt.
-
-NOTICE: As of September 10th, the newest version of [cobalt.tools](https://cobalt.tools) contains breaking api changes. I made the changes necessary but ran into a massive issue that I do not feel motivated to fix. See [issue #1](https://github.com/khyerdev/tcobalt/issues/1) for more details.
 
 ## Features
 * tcobalt allows you to download videos and audios just as easily as you can with [cobalt.tools](https://cobalt.tools) with `tcb get`
@@ -161,12 +171,6 @@ The [tokio](https://crates.io/crates/tokio) runtime, for easily handling asynchr
 [reqwest](https://crates.io/crates/reqwest), for making web requests with HTTPS. Requires tokio to work
 
 I have reinvented the wheel for things that are possible for me to do without dependencies, like parsing json
-
-## Other Projects
-tcobalt is not original, and a few other projects have the same concept implemented in other languages. Check them out, see if you prefer them over this one.
-* [lostdusty/cobalt](https://github.com/lostdusty/cobalt): Cobalt CLI written in golang
-* [lostdusty/gobalt](https://github.com/lostdusty/gobalt): Golang library for the Cobalt API
-* [tskau/tobalt](https://github.com/tskau/tobalt): Typescript library for the Cobalt API
 
 ## License
 This project is licensed under the [GNU GPL v3](https://www.gnu.org/licenses/gpl-3.0.en.html), meaning you are allowed to freely use, modify, and distribute this project as long as you keep it as free and open-source as this project is, and as long as you include the same lisence and indicate your changes. More information about this license is [here (fossa.com)](https://fossa.com/blog/open-source-software-licenses-101-gpl-v3/) and [here (gnu.org)](https://www.gnu.org/licenses/quick-guide-gplv3.html).
